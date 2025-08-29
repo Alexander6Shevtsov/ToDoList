@@ -14,6 +14,7 @@
 		42E974342E61CD2A00879F5B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 42E974252E61CD2A00879F5B /* Assets.xcassets */; };
 		42E974362E61CD2A00879F5B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 42E974282E61CD2A00879F5B /* LaunchScreen.storyboard */; };
 		42E974392E61CD4500879F5B /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E974382E61CD4500879F5B /* RootViewController.swift */; };
+		42E9743B2E61D2F300879F5B /* ToDoListContracts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E9743A2E61D2F300879F5B /* ToDoListContracts.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,7 @@
 		42E9742D2E61CD2A00879F5B /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		42E9742F2E61CD2A00879F5B /* ToDoList.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = ToDoList.xcdatamodel; sourceTree = "<group>"; };
 		42E974382E61CD4500879F5B /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
+		42E9743A2E61D2F300879F5B /* ToDoListContracts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListContracts.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -112,6 +114,7 @@
 				42E9742B2E61CD2A00879F5B /* SceneDelegate.swift */,
 				42E9742D2E61CD2A00879F5B /* ViewController.swift */,
 				42E974382E61CD4500879F5B /* RootViewController.swift */,
+				42E9743A2E61D2F300879F5B /* ToDoListContracts.swift */,
 				42E974282E61CD2A00879F5B /* LaunchScreen.storyboard */,
 				42E974252E61CD2A00879F5B /* Assets.xcassets */,
 				42E974262E61CD2A00879F5B /* Info.plist */,
@@ -264,6 +267,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				42E974392E61CD4500879F5B /* RootViewController.swift in Sources */,
+				42E9743B2E61D2F300879F5B /* ToDoListContracts.swift in Sources */,
 				42E974302E61CD2A00879F5B /* AppDelegate.swift in Sources */,
 				42E974312E61CD2A00879F5B /* SceneDelegate.swift in Sources */,
 				42E974322E61CD2A00879F5B /* ToDoList.xcdatamodeld in Sources */,
