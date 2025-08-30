@@ -8,7 +8,7 @@
 import UIKit
 
 // MARK: - View
-protocol ToDoListView: AnyObject {
+protocol ToDoListViewInput: AnyObject {
     func display(items: [ToDoViewModel])
     func setLoading(_ isLoading: Bool)
     func showError(_ message: String)
@@ -46,7 +46,7 @@ protocol ToDoListRouterInput: AnyObject {
 
 // MARK: - черновые модели
 struct ToDoEntity: Equatable {
-    let id: Int64
+    let id: Int
     let title: String
     let details: String?
     let createdAt: Date
