@@ -65,15 +65,15 @@ extension ToDoListPresenter: ToDoListViewOutput {
             router.openEdit(id: id, from: vc)
         }
     }
-
+    
     func didToggleDone(id: Int) {
         interactor.toggleDone(id: id)
     }
-
+    
     func didDelete(id: Int) {
         interactor.delete(id: id)
     }
-
+    
     func didSearch(qwerty: String) {
         interactor.search(qwerty: qwerty)
     }
@@ -84,11 +84,11 @@ extension ToDoListPresenter: ToDoListInteractorOutput {
     func didChangeLoading(_ isLoading: Bool) {
         view?.setLoading(isLoading)
     }
-
+    
     func didUpdate(items: [ToDoEntity]) {
         view?.display(items: map(items))
     }
-
+    
     func didFail(error: Error) {
         view?.showError(error.localizedDescription)
     }
