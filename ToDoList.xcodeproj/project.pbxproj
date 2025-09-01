@@ -19,6 +19,7 @@
 		42E9743F2E63421800879F5B /* ToDoListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E9743E2E63421800879F5B /* ToDoListRouter.swift */; };
 		42E974412E644E2100879F5B /* ToDoListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E974402E644E2100879F5B /* ToDoListViewController.swift */; };
 		42E974432E65784A00879F5B /* ToDoListInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E974422E65784A00879F5B /* ToDoListInteractor.swift */; };
+		42E974452E658F6D00879F5B /* ToDoListModuleBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E974442E658F6D00879F5B /* ToDoListModuleBuilder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		42E9743E2E63421800879F5B /* ToDoListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListRouter.swift; sourceTree = "<group>"; };
 		42E974402E644E2100879F5B /* ToDoListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListViewController.swift; sourceTree = "<group>"; };
 		42E974422E65784A00879F5B /* ToDoListInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListInteractor.swift; sourceTree = "<group>"; };
+		42E974442E658F6D00879F5B /* ToDoListModuleBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListModuleBuilder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -127,6 +129,7 @@
 				42E9743E2E63421800879F5B /* ToDoListRouter.swift */,
 				42E974402E644E2100879F5B /* ToDoListViewController.swift */,
 				42E974422E65784A00879F5B /* ToDoListInteractor.swift */,
+				42E974442E658F6D00879F5B /* ToDoListModuleBuilder.swift */,
 				42E974282E61CD2A00879F5B /* LaunchScreen.storyboard */,
 				42E974252E61CD2A00879F5B /* Assets.xcassets */,
 				42E974262E61CD2A00879F5B /* Info.plist */,
@@ -284,6 +287,7 @@
 				42E9743B2E61D2F300879F5B /* ToDoListContracts.swift in Sources */,
 				42E974302E61CD2A00879F5B /* AppDelegate.swift in Sources */,
 				42E974312E61CD2A00879F5B /* SceneDelegate.swift in Sources */,
+				42E974452E658F6D00879F5B /* ToDoListModuleBuilder.swift in Sources */,
 				42E974432E65784A00879F5B /* ToDoListInteractor.swift in Sources */,
 				42E974322E61CD2A00879F5B /* ToDoList.xcdatamodeld in Sources */,
 				42E974412E644E2100879F5B /* ToDoListViewController.swift in Sources */,
