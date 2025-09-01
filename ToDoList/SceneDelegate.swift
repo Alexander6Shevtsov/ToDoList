@@ -9,19 +9,21 @@ import UIKit
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
-
-    func scene(_ scene: UIScene,
-               willConnectTo session: UISceneSession,
-               options connectionOptions: UIScene.ConnectionOptions) {
+    
+    func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
         guard let windowScene = scene as? UIWindowScene else { return }
-
+        
         let window = UIWindow(windowScene: windowScene)
-        let rootVC = UINavigationController(rootViewController: RootViewController())
-        window.rootViewController = rootVC
+        let listVC = ToDoListModuleBuilder.build()
+        let rootNavigationController = UINavigationController(rootViewController: listVC)
+        window.rootViewController = rootNavigationController
         window.makeKeyAndVisible()
         self.window = window
     }
-
     
     func sceneDidDisconnect(_ scene: UIScene) {}
     
