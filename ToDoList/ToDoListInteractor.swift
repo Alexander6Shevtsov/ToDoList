@@ -8,7 +8,12 @@
 import Foundation
 
 final class ToDoListInteractor: ToDoListInteractorInput {
+    
     weak var output: ToDoListInteractorOutput?
+    
+    private let apiClient: ToDosAPIClient
+    private let userDefaults: UserDefaults
+    private let seededKey = "todo.seeded"
     
     // Фоновая очередь для операций
     private let operationQueue: OperationQueue = {
@@ -21,18 +26,43 @@ final class ToDoListInteractor: ToDoListInteractorInput {
     // Временное хранилище
     private var storage: [ToDoEntity] = []
     
-    // MARK: ToDoListInteractorInput
+    // MARK: - Init
+    // Параметры с дефолтами, чтобы сборщик модуля мог вызывать без аргументов.
+    init(
+        apiClient: ToDosAPIClient = ToDosAPIClient(),
+        userDefaults: UserDefaults = .standard
+    ) {
+        self.apiClient = apiClient
+        self.userDefaults = userDefaults
+    }
+    
+    // MARK: - ToDoListInteractorInput
     
     func initialLoad() {
         output?.didChangeLoading(true)
         operationQueue.addOperation { [weak self] in
             guard let self else { return }
             
-            // Имитация первичной загрузки. Позже: импорт из API → Core Data.
-            Thread.sleep(forTimeInterval: 0.1) // пауза, чтобы проверить индикатор
+            if self.userDefaults.bool(forKey: self.seededKey) {
+                self.notifyUpdate()
+                self.notifyLoading(false)
+                return
+            }
             
-            self.notifyUpdate()
-            self.notifyLoading(false)
+            // Первичная загрузка API
+            self.apiClient.fetchAll { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let entities):
+                    self.storage = entities
+                    self.userDefaults.set(true, forKey: self.seededKey)
+                    self.notifyUpdate()
+                    self.notifyLoading(false)
+                case .failure(let error):
+                    self.notifyError(error)
+                    self.notifyLoading(false)
+                }
+            }
         }
     }
     
@@ -106,6 +136,12 @@ final class ToDoListInteractor: ToDoListInteractorInput {
     private func notifyLoading(_ isLoading: Bool) {
         DispatchQueue.main.async { [weak self] in
             self?.output?.didChangeLoading(isLoading)
+        }
+    }
+    
+    private func notifyError(_ error: Error) {
+        DispatchQueue.main.async { [weak self] in
+            self?.output?.didFail(error: error)
         }
     }
 }
