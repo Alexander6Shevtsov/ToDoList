@@ -43,12 +43,6 @@ final class ToDoListInteractor: ToDoListInteractorInput {
         operationQueue.addOperation { [weak self] in
             guard let self else { return }
             
-            if self.userDefaults.bool(forKey: self.seededKey) {
-                self.notifyUpdate()
-                self.notifyLoading(false)
-                return
-            }
-            
             // Первичная загрузка API
             self.apiClient.fetchAll { [weak self] result in
                 guard let self else { return }
