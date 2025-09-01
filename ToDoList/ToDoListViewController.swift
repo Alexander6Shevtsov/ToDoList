@@ -129,7 +129,7 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
 // MARK: - Search
 extension ToDoListViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        output.didSearch(qwerty: searchController.searchBar.text ?? "")
+        output.didSearch(query: searchController.searchBar.text ?? "")
     }
 }
 

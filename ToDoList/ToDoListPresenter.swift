@@ -74,9 +74,9 @@ extension ToDoListPresenter: ToDoListViewOutput {
         interactor.delete(id: id)
     }
     
-    func didSearch(qwerty: String) {
-        interactor.search(qwerty: qwerty)
-    }
+    func didSearch(query: String) {
+         interactor.search(query: query)
+     }
 }
 
 // MARK: - Interactor → Presenter

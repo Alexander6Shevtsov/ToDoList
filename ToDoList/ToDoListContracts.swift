@@ -20,14 +20,14 @@ protocol ToDoListViewOutput: AnyObject {
     func didSelectItem(id: Int)
     func didToggleDone(id: Int)
     func didDelete(id: Int)
-    func didSearch(qwerty: String)
+    func didSearch(query: String)
 }
 
 // MARK: Interactor
 protocol ToDoListInteractorInput: AnyObject {
     func initialLoad()
     func fetchAll()
-    func search(qwerty: String)
+    func search(query: String)
     func toggleDone(id: Int)
     func delete(id: Int)
 }
