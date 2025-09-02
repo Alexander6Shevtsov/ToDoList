@@ -30,6 +30,9 @@ protocol ToDoListInteractorInput: AnyObject {
     func search(query: String)
     func toggleDone(id: Int)
     func delete(id: Int)
+    
+    func create(title: String, details: String?)
+    func update(id: Int, title: String, details: String?)
 }
 
 protocol ToDoListInteractorOutput: AnyObject {
@@ -38,13 +41,18 @@ protocol ToDoListInteractorOutput: AnyObject {
     func didChangeLoading(_ isLoading: Bool)
 }
 
+extension ToDoListInteractorInput {
+    func create(title: String, details: String?) {}
+    func update(id: Int, title: String, details: String?) {}
+}
+
 // MARK: - Router
 protocol ToDoListRouterInput: AnyObject {
     func openCreate(from: UIViewController)
     func openEdit(id: Int, from: UIViewController)
 }
 
-// MARK: - черновые модели
+// MARK: - Models
 struct ToDoEntity: Equatable {
     let id: Int
     let title: String
