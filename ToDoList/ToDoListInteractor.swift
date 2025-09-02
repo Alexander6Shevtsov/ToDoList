@@ -13,9 +13,10 @@ final class ToDoListInteractor: ToDoListInteractorInput {
     
     private let apiClient: ToDosAPIClient
     private let userDefaults: UserDefaults
+    private let repository: ToDoRepository
     private let seededKey = "todo.seeded"
     
-    // Фоновая очередь для операций
+    // Фоновая очередь
     private let operationQueue: OperationQueue = {
         let operationQueue = OperationQueue()
         operationQueue.name = "todo.interactor.queue"
@@ -23,35 +24,61 @@ final class ToDoListInteractor: ToDoListInteractorInput {
         return operationQueue
     }()
     
-    // Временное хранилище
-    private var storage: [ToDoEntity] = []
-    
     // MARK: - Init
-    // Параметры с дефолтами, чтобы сборщик модуля мог вызывать без аргументов.
     init(
         apiClient: ToDosAPIClient = ToDosAPIClient(),
-        userDefaults: UserDefaults = .standard
+        userDefaults: UserDefaults = .standard,
+        repository: ToDoRepository = ToDoRepository()
     ) {
         self.apiClient = apiClient
         self.userDefaults = userDefaults
+        self.repository = repository
     }
     
     // MARK: - ToDoListInteractorInput
-    
     func initialLoad() {
         output?.didChangeLoading(true)
         operationQueue.addOperation { [weak self] in
             guard let self else { return }
             
-            // Первичная загрузка API
-            self.apiClient.fetchAll { [weak self] result in
+            self.repository.fetchAll { [weak self] result in
                 guard let self else { return }
                 switch result {
-                case .success(let entities):
-                    self.storage = entities
-                    self.userDefaults.set(true, forKey: self.seededKey)
-                    self.notifyUpdate()
+                case .success(let items) where items.isEmpty == false:
+                    self.notify(items: items)
                     self.notifyLoading(false)
+                    
+                case .success:
+                    self.apiClient.fetchAll { [weak self] apiResult in
+                        guard let self else { return }
+                        switch apiResult {
+                        case .success(let entities):
+                            self.repository.upsert(entities) { [weak self] upsertResult in
+                                guard let self else { return }
+                                switch upsertResult {
+                                case .success:
+                                    self.userDefaults.set(true, forKey: self.seededKey)
+                                    self.repository.fetchAll { [weak self] fetch2 in
+                                        guard let self else { return }
+                                        switch fetch2 {
+                                        case .success(let items2):
+                                            self.notify(items: items2)
+                                        case .failure(let error):
+                                            self.notifyError(error)
+                                        }
+                                        self.notifyLoading(false)
+                                    }
+                                case .failure(let error):
+                                    self.notifyError(error)
+                                    self.notifyLoading(false)
+                                }
+                            }
+                        case .failure(let error):
+                            self.notifyError(error)
+                            self.notifyLoading(false)
+                        }
+                    }
+                    
                 case .failure(let error):
                     self.notifyError(error)
                     self.notifyLoading(false)
@@ -63,64 +90,54 @@ final class ToDoListInteractor: ToDoListInteractorInput {
     func fetchAll() {
         output?.didChangeLoading(true)
         operationQueue.addOperation { [weak self] in
-            self?.notifyUpdate()
-            self?.notifyLoading(false)
+            self?.repository.fetchAll { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let items): self.notify(items: items)
+                case .failure(let error): self.notifyError(error)
+                }
+                self.notifyLoading(false)
+            }
         }
     }
     
     func search(query: String) {
         operationQueue.addOperation { [weak self] in
-            guard let self else { return }
-            let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            let result: [ToDoEntity]
-            if trimmed.isEmpty {
-                result = self.storage
-            } else {
-                result = self.storage.filter {
-                    $0.title.lowercased().contains(trimmed) || (
-                        $0.details?.lowercased().contains(trimmed) ?? false
-                    )
+            self?.repository.search(query: query) { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let items): self.notify(items: items)
+                case .failure(let error): self.notifyError(error)
                 }
             }
-            self.notify(items: result)
         }
     }
     
     func toggleDone(id: Int) {
         operationQueue.addOperation { [weak self] in
-            guard let self else { return }
-            if let idx = self.storage.firstIndex(where: { $0.id == id }) {
-                var item = self.storage[idx]
-                item = ToDoEntity(
-                    id: item.id,
-                    title: item.title,
-                    details: item.details,
-                    createdAt: item.createdAt,
-                    isDone: !item.isDone
-                )
-                self.storage[idx] = item
+            self?.repository.toggleDone(id: id) { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let items): self.notify(items: items)
+                case .failure(let error): self.notifyError(error)
+                }
             }
-            self.notifyUpdate()
         }
     }
     
     func delete(id: Int) {
         operationQueue.addOperation { [weak self] in
-            guard let self else { return }
-            self.storage.removeAll { $0.id == id }
-            self.notifyUpdate()
+            self?.repository.delete(id: id) { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let items): self.notify(items: items)
+                case .failure(let error): self.notifyError(error)
+                }
+            }
         }
     }
     
-    // MARK: - Helpers
-    
-    private func notifyUpdate() {
-        let snapshot = storage
-        DispatchQueue.main.async { [weak self] in
-            self?.output?.didUpdate(items: snapshot)
-        }
-    }
-    
+    // MARK: - Notify
     private func notify(items: [ToDoEntity]) {
         DispatchQueue.main.async { [weak self] in
             self?.output?.didUpdate(items: items)
