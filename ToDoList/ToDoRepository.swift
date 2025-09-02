@@ -143,4 +143,67 @@ final class ToDoRepository {
             catch { completion(.failure(error)) }
         }
     }
+    
+    func create(
+        title: String,
+        details: String?,
+        completion: @escaping (Result<[ToDoEntity], Error>) -> Void
+    ) {
+        performBackground { context in
+            // nextId = max(id) + 1
+            let request: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
+            request.fetchLimit = 1
+            request.sortDescriptors = [NSSortDescriptor(
+                key: #keyPath(CDToDo.id),
+                ascending: false
+            )]
+            let last = try context.fetch(request).first
+            let nextId = Int((last?.id ?? 0) + 1)
+
+            let entity = ToDoEntity(
+                id: nextId,
+                title: title,
+                details: details,
+                createdAt: Date(),
+                isDone: false
+            )
+            _ = CDToDo.insert(into: context, from: entity)
+            try context.save()
+
+            let all: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
+            all.sortDescriptors = [NSSortDescriptor(
+                key: #keyPath(
+                    CDToDo.createdAt
+                ),
+                ascending: false
+            )]
+            return try context.fetch(all).map { $0.toDomain() }
+        } completion: { completion($0) }
+    }
+    
+    func update(
+        id: Int,
+        title: String,
+        details: String?,
+        completion: @escaping (Result<[ToDoEntity], Error>) -> Void
+    ) {
+        performBackground { context in
+            let fetch: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
+            fetch.fetchLimit = 1
+            fetch.predicate = NSPredicate(format: "id == %lld", Int64(id))
+            if let obj = try context.fetch(fetch).first {
+                obj.title = title
+                obj.details = details
+                try context.save()
+            }
+            let all: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
+            all.sortDescriptors = [NSSortDescriptor(
+                key: #keyPath(
+                    CDToDo.createdAt
+                ),
+                ascending: false
+            )]
+            return try context.fetch(all).map { $0.toDomain() }
+        } completion: { completion($0) }
+    }
 }
