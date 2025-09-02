@@ -93,3 +93,13 @@ extension ToDoListPresenter: ToDoListInteractorOutput {
         view?.showError(error.localizedDescription)
     }
 }
+
+extension ToDoListPresenter {
+    func handleCreateInput(title: String, details: String?) {
+        interactor.create(title: title, details: details)
+    }
+
+    func handleUpdateInput(id: Int, title: String, details: String?) {
+        interactor.update(id: id, title: title, details: details)
+    }
+}
