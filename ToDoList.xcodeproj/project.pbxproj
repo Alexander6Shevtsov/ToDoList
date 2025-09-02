@@ -21,6 +21,7 @@
 		42E974452E658F6D00879F5B /* ToDoListModuleBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E974442E658F6D00879F5B /* ToDoListModuleBuilder.swift */; };
 		42E974472E659AF600879F5B /* ToDosAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E974462E659AF600879F5B /* ToDosAPIClient.swift */; };
 		42E9744E2E65BF8F00879F5B /* ToDoList.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 42E9744C2E65BF8F00879F5B /* ToDoList.xcdatamodeld */; };
+		42E974502E65DB3300879F5B /* CDToDo+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E9744F2E65DB3300879F5B /* CDToDo+CoreData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,7 @@
 		42E974442E658F6D00879F5B /* ToDoListModuleBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListModuleBuilder.swift; sourceTree = "<group>"; };
 		42E974462E659AF600879F5B /* ToDosAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDosAPIClient.swift; sourceTree = "<group>"; };
 		42E9744D2E65BF8F00879F5B /* ToDoList.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = ToDoList.xcdatamodel; sourceTree = "<group>"; };
+		42E9744F2E65DB3300879F5B /* CDToDo+CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDToDo+CoreData.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -133,6 +135,7 @@
 				42E974422E65784A00879F5B /* ToDoListInteractor.swift */,
 				42E974442E658F6D00879F5B /* ToDoListModuleBuilder.swift */,
 				42E974462E659AF600879F5B /* ToDosAPIClient.swift */,
+				42E9744F2E65DB3300879F5B /* CDToDo+CoreData.swift */,
 				42E974282E61CD2A00879F5B /* LaunchScreen.storyboard */,
 				42E9744C2E65BF8F00879F5B /* ToDoList.xcdatamodeld */,
 				42E974252E61CD2A00879F5B /* Assets.xcassets */,
@@ -292,6 +295,7 @@
 				42E974302E61CD2A00879F5B /* AppDelegate.swift in Sources */,
 				42E974312E61CD2A00879F5B /* SceneDelegate.swift in Sources */,
 				42E9744E2E65BF8F00879F5B /* ToDoList.xcdatamodeld in Sources */,
+				42E974502E65DB3300879F5B /* CDToDo+CoreData.swift in Sources */,
 				42E974452E658F6D00879F5B /* ToDoListModuleBuilder.swift in Sources */,
 				42E974432E65784A00879F5B /* ToDoListInteractor.swift in Sources */,
 				42E974412E644E2100879F5B /* ToDoListViewController.swift in Sources */,
