@@ -125,6 +125,34 @@ final class ToDoListInteractor: ToDoListInteractorInput {
         }
     }
     
+    func create(title: String, details: String?) {
+        operationQueue.addOperation { [weak self] in
+            self?.repository.create(title: title, details: details) { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let items): self.notify(items: items)
+                case .failure(let error): self.notifyError(error)
+                }
+            }
+        }
+    }
+    
+    func update(id: Int, title: String, details: String?) {
+        operationQueue.addOperation { [weak self] in
+            self?.repository.update(
+                id: id,
+                title: title,
+                details: details
+            ) { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let items): self.notify(items: items)
+                case .failure(let error): self.notifyError(error)
+                }
+            }
+        }
+    }
+    
     func delete(id: Int) {
         operationQueue.addOperation { [weak self] in
             self?.repository.delete(id: id) { [weak self] result in
