@@ -19,6 +19,7 @@ enum ToDoListModuleBuilder {
             router: router
         )
         
+        router.presenter = presenter
         interactor.output = presenter
         viewController.output = presenter
         

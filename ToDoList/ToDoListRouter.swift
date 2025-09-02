@@ -8,23 +8,66 @@
 import UIKit
 
 final class ToDoListRouter: ToDoListRouterInput {
+    
+    weak var presenter: ToDoListPresenter?
+    
     func openCreate(from: UIViewController) {
-        let alert = UIAlertController(
-            title: "Create",
-            message: "Stub screen",
-            preferredStyle: .alert
-        )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        from.present(alert, animated: true)
+        presentForm(
+            from: from,
+            title: "New ToDo",
+            initialTitle: nil,
+            initialDetails: nil
+        ) { [weak self] title, details in
+            self?.presenter?.handleCreateInput(title: title, details: details)
+        }
     }
     
     func openEdit(id: Int, from: UIViewController) {
-        let alert = UIAlertController(
-            title: "Edit",
-            message: "Stub for id \(id)",
-            preferredStyle: .alert
-        )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        presentForm(
+            from: from,
+            title: "Edit ToDo",
+            initialTitle: nil,
+            initialDetails: nil
+        ) { [weak self] title, details in
+            self?.presenter?.handleUpdateInput(id: id, title: title, details: details)
+        }
+    }
+    
+    // MARK: - Private
+    private func presentForm(
+        from: UIViewController,
+        title: String,
+        initialTitle: String?,
+        initialDetails: String?,
+        onSave: @escaping (_ title: String, _ details: String?) -> Void
+    ) {
+        let alert = UIAlertController(title: title, message: nil, preferredStyle: .alert)
+        
+        alert.addTextField { tf in
+            tf.placeholder = "Title"
+            tf.text = initialTitle
+            tf.clearButtonMode = .whileEditing
+        }
+        alert.addTextField { tf in
+            tf.placeholder = "Details (optional)"
+            tf.text = initialDetails
+            tf.clearButtonMode = .whileEditing
+        }
+        
+        let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
+            let titleText = alert.textFields?.first?.text?.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            ) ?? ""
+            let detailsText = alert.textFields?.last?.text?.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+            guard titleText.isEmpty == false else { return }
+            onSave(titleText, detailsText?.isEmpty == true ? nil : detailsText)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
         from.present(alert, animated: true)
     }
 }
