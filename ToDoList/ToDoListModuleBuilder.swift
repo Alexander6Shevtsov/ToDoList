@@ -9,18 +9,19 @@ import UIKit
 
 enum ToDoListModuleBuilder {
     static func build() -> UIViewController {
-        let view = ToDoListViewController()
-        let interactor = ToDoListInteractor()
+        let viewController = ToDoListViewController()
+        let repository = ToDoRepository()
+        let interactor = ToDoListInteractor(repository: repository)
         let router = ToDoListRouter()
         let presenter = ToDoListPresenter(
-            view: view,
+            view: viewController,
             interactor: interactor,
             router: router
         )
         
         interactor.output = presenter
-        view.output = presenter
+        viewController.output = presenter
         
-        return view
+        return viewController
     }
 }
