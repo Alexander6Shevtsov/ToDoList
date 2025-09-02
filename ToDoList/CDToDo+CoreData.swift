@@ -16,7 +16,7 @@ extension CDToDo {
         NSFetchRequest<CDToDo>(entityName: "CDToDo")
     }
     
-    @NSManaged var id: Int
+    @NSManaged var id: Int64
     @NSManaged var title: String
     @NSManaged var details: String?
     @NSManaged var createdAt: Date
@@ -54,7 +54,7 @@ extension CDToDo {
         from entity: ToDoEntity
     ) -> CDToDo {
         let object = CDToDo(context: context)
-        object.id = Int(entity.id)
+        object.id = Int64(entity.id)
         object.title = entity.title
         object.details = entity.details
         object.createdAt = entity.createdAt
