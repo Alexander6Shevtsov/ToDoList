@@ -17,63 +17,31 @@ final class ToDosAPIClient {
     }
     
     func fetchAll(completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
-        var components = URLComponents(
-            url: baseURL.appendingPathComponent("/todos"),
-            resolvingAgainstBaseURL: true
-        )!
+        var components = URLComponents(url: baseURL.appendingPathComponent("/todos"), resolvingAgainstBaseURL: true)!
         components.queryItems = [URLQueryItem(name: "limit", value: "0")]
+        guard let url = components.url else { return completion(.failure(APIError.invalidURL)) }
         
-        guard let url = components.url else {
-            completion(.failure(APIError.invalidURL))
-            return
-        }
-        
-        let task = urlSession.dataTask(with: url) {
-            data,
-            response,
-            error in
-            if let error = error {
-                completion(.failure(error))
-                return
+        urlSession.dataTask(with: url) { data, response, error in
+            if let error = error { return completion(.failure(error)) }
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                return completion(.failure(APIError.httpStatus((response as? HTTPURLResponse)?.statusCode ?? -1)))
             }
-            if let http = response as? HTTPURLResponse,
-               (200..<300).contains(http.statusCode) == false {
-                completion(.failure(APIError.httpStatus(http.statusCode)))
-                return
-            }
-            // парсинг JSON
-            guard let data = data else {
-                completion(.failure(APIError.emptyData))
-                return
-            }
+            guard let data = data else { return completion(.failure(APIError.emptyData)) }
+            
             do {
-                let todosResponseDTO = try JSONDecoder().decode(
-                    ToDoResponseDTO.self,
-                    from: data
-                )
-                let importTimestamp = Date()
-                let entities: [ToDoEntity] = todosResponseDTO.todos.map {
-                    ToDoEntity(
-                        id: $0.id,
-                        title: $0.todo,
-                        details: nil,
-                        createdAt: importTimestamp,
-                        isDone: $0.completed
-                    )
+                let dto = try JSONDecoder().decode(ToDoResponseDTO.self, from: data)
+                let now = Date()
+                let entities = dto.todos.map {
+                    ToDoEntity(id: $0.id, title: $0.todo, details: nil, createdAt: now, isDone: $0.completed)
                 }
                 completion(.success(entities))
             } catch {
                 completion(.failure(error))
             }
-        }
-        task.resume()
+        }.resume()
     }
     
-    enum APIError: Error {
-        case invalidURL
-        case httpStatus(Int)
-        case emptyData
-    }
+    enum APIError: Error { case invalidURL, httpStatus(Int), emptyData }
 }
 
 // MARK: - DTO
@@ -86,7 +54,7 @@ private struct ToDoResponseDTO: Decodable {
 
 private struct ToDoDTO: Decodable {
     let id: Int
-    let todo:String
+    let todo: String
     let completed: Bool
     let userId: Int
 }
