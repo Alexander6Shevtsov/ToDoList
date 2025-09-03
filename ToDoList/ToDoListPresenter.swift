@@ -14,6 +14,7 @@ final class ToDoListPresenter {
     private weak var viewController: UIViewController?
     private let interactor: ToDoListInteractorInput
     private let router: ToDoListRouterInput
+    private var searchDebounceWorkItem: DispatchWorkItem?
     
     // MARK: - State
     private let dateFormatter: DateFormatter = {
@@ -53,7 +54,15 @@ extension ToDoListPresenter: ToDoListViewOutput {
     func didTapAdd() { if let vc = viewController { router.openCreate(from: vc) } }
     func didToggleDone(id: Int) { interactor.toggleDone(id: id) }
     func didDelete(id: Int) { interactor.delete(id: id) }
-    func didSearch(query: String) { interactor.search(query: query) }
+    func didSearch(query: String) {
+        searchDebounceWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.interactor.search(query: query)
+        }
+        searchDebounceWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: workItem)
+    }
+
     func didSelectItem(id: Int) {
         if let vc = viewController {
             router.openEdit(
