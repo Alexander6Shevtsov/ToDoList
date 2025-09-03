@@ -25,7 +25,7 @@ extension CDToDo {
     
     var userIdInt: Int? {
         get { userId?.intValue }
-        set { userId = newValue.map { NSNumber(value: $0) } }
+        set { userId = newValue.map(NSNumber.init(value:)) }
     }
 }
 

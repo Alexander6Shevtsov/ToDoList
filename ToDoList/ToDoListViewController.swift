@@ -35,8 +35,14 @@ final class ToDoListViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        refreshControl.addTarget(self, action: #selector(didPullToRefresh), for: .valueChanged)
         tableView.refreshControl = refreshControl
+        refreshControl.addTarget(
+            self,
+            action: #selector(
+                didPullToRefresh
+            ),
+            for: .valueChanged
+        )
         
         // Search
         searchController.obscuresBackgroundDuringPresentation = false
@@ -45,23 +51,24 @@ final class ToDoListViewController: UIViewController {
         definesPresentationContext = true
         
         activity.hidesWhenStopped = true
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: activity)
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: activity)
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
-            action: #selector(addTapped)
+            action: #selector(didTapAdd)
         )
         
         output.viewDidLoad()
     }
     
     @objc private func didPullToRefresh() {
-        output.didSearch(query: "")
+        searchController.searchBar.text = ""
         output.viewDidLoad()
     }
     
-    @objc private func addTapped() {
+    // MARK: - Actions
+    @objc private func didTapAdd() {
         output.didTapAdd()
     }
 }
@@ -79,7 +86,11 @@ extension ToDoListViewController: ToDoListViewInput {
     }
     
     func showError(_ message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: "Error",
+            message: message,
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
@@ -87,6 +98,7 @@ extension ToDoListViewController: ToDoListViewInput {
 
 // MARK: - Table DS/Delegate
 extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
+    
     func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
@@ -96,17 +108,18 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
-        let viewModel = items[indexPath.row]
         let cell = tableView.dequeueReusableCell(
             withIdentifier: Cell.reuseId,
             for: indexPath
         ) as! Cell
-        cell.configure(with: viewModel)
+        cell.configure(with: items[indexPath.row])
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        output.didSelectItem(id: items[indexPath.row].id)
+        let id = items[indexPath.row].id
+        output.didSelectItem(id: id)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     // Свайпы
@@ -114,25 +127,26 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
         _ tableView: UITableView,
         leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
-        let viewModel = items[indexPath.row]
-        let done = UIContextualAction(
-            style: .normal,
-            title: viewModel.isDone ? "Undone" : "Done"
-        ) { [weak self] _,_, finish in
-            self?.output.didToggleDone(id: viewModel.id); finish(true)
+        let id = items[indexPath.row].id
+        let toggle = UIContextualAction(style: .normal, title: "Done") { [weak self] _,_, done in
+            self?.output.didToggleDone(id: id); done(true)
         }
-        return UISwipeActionsConfiguration(actions: [done])
+        let cfg = UISwipeActionsConfiguration(actions: [toggle])
+        cfg.performsFirstActionWithFullSwipe = true
+        return cfg
     }
     
     func tableView(
         _ tableView: UITableView,
         trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
-        let viewModel = items[indexPath.row]
-        let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _,_, finish in
-            self?.output.didDelete(id: viewModel.id); finish(true)
+        let id = items[indexPath.row].id
+        let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _,_, done in
+            self?.output.didDelete(id: id); done(true)
         }
-        return UISwipeActionsConfiguration(actions: [delete])
+        let cfg = UISwipeActionsConfiguration(actions: [delete])
+        cfg.performsFirstActionWithFullSwipe = true
+        return cfg
     }
 }
 

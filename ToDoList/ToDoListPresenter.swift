@@ -11,6 +11,7 @@ final class ToDoListPresenter {
     
     // MARK: - Dependencies
     private weak var view: ToDoListViewInput?
+    private weak var viewController: UIViewController?
     private let interactor: ToDoListInteractorInput
     private let router: ToDoListRouterInput
     
@@ -23,12 +24,11 @@ final class ToDoListPresenter {
     }()
     
     // MARK: - Init
-    init(
-        view: ToDoListViewInput,
-        interactor: ToDoListInteractorInput,
-        router: ToDoListRouterInput
-    ) {
+    init(view: ToDoListViewInput & UIViewController,
+         interactor: ToDoListInteractorInput,
+         router: ToDoListRouterInput) {
         self.view = view
+        self.viewController = view
         self.interactor = interactor
         self.router = router
     }
@@ -49,35 +49,21 @@ final class ToDoListPresenter {
 
 // MARK: - View -> Presenter
 extension ToDoListPresenter: ToDoListViewOutput {
-    func viewDidLoad() {
-        view?.setLoading(true)
-        interactor.initialLoad()
-    }
-    
-    func didTapAdd() {
-        if let vc = view as? UIViewController {
-            router.openCreate(from: vc)
-        }
-    }
-    
+    func viewDidLoad() { interactor.initialLoad() }
+    func didTapAdd() { if let vc = viewController { router.openCreate(from: vc) } }
+    func didToggleDone(id: Int) { interactor.toggleDone(id: id) }
+    func didDelete(id: Int) { interactor.delete(id: id) }
+    func didSearch(query: String) { interactor.search(query: query) }
     func didSelectItem(id: Int) {
-        if let vc = view as? UIViewController {
-            router.openEdit(id: id, from: vc)
+        if let vc = viewController {
+            router.openEdit(
+                id: id,
+                from: vc
+            )
         }
     }
-    
-    func didToggleDone(id: Int) {
-        interactor.toggleDone(id: id)
-    }
-    
-    func didDelete(id: Int) {
-        interactor.delete(id: id)
-    }
-    
-    func didSearch(query: String) {
-         interactor.search(query: query)
-     }
 }
+
 
 // MARK: - Interactor → Presenter
 extension ToDoListPresenter: ToDoListInteractorOutput {
@@ -98,7 +84,7 @@ extension ToDoListPresenter {
     func handleCreateInput(title: String, details: String?) {
         interactor.create(title: title, details: details)
     }
-
+    
     func handleUpdateInput(id: Int, title: String, details: String?) {
         interactor.update(id: id, title: title, details: details)
     }
