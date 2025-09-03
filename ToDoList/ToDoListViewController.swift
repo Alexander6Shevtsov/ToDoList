@@ -14,20 +14,25 @@ final class ToDoListViewController: UIViewController {
     private let refreshControl = UIRefreshControl()
     
     // UI
-    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
+    private let tableView = UITableView(frame: .zero, style: .plain)
     private let activity = UIActivityIndicatorView(style: .medium)
     private let searchController = UISearchController(searchResultsController: nil)
     
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "ToDos"
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = AppColor.black
         
+        tableView.backgroundColor = AppColor.black
+        tableView.separatorColor = AppColor.stroke
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(Cell.self, forCellReuseIdentifier: Cell.reuseId)
+        tableView.keyboardDismissMode = .onDrag
         view.addSubview(tableView)
+        
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -47,8 +52,18 @@ final class ToDoListViewController: UIViewController {
         // Search
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchResultsUpdater = self
+        searchController.searchBar.overrideUserInterfaceStyle = .dark
         navigationItem.searchController = searchController
         definesPresentationContext = true
+        
+        let stf = searchController.searchBar.searchTextField
+        stf.textColor = AppColor.white
+        stf.tintColor = AppColor.yellow
+        stf.backgroundColor = AppColor.gray
+        stf.attributedPlaceholder = NSAttributedString(
+            string: "Search",
+            attributes: [.foregroundColor: UIColor.secondaryLabel]
+        )
         
         activity.hidesWhenStopped = true
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: activity)
@@ -127,14 +142,20 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
         _ tableView: UITableView,
         leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
-        let id = items[indexPath.row].id
-        let toggle = UIContextualAction(style: .normal, title: "Done") { [weak self] _,_, done in
-            self?.output.didToggleDone(id: id); done(true)
+        let item = items[indexPath.row]
+        let id = item.id
+        let actionTitle = item.isDone ? "Undo" : "Done"
+        
+        let toggle = UIContextualAction(style: .normal, title: actionTitle) { [weak self] _,_, done in
+            self?.output.didToggleDone(id: id)
+            done(true)
         }
-        let cfg = UISwipeActionsConfiguration(actions: [toggle])
-        cfg.performsFirstActionWithFullSwipe = true
-        return cfg
+        
+        let configuration = UISwipeActionsConfiguration(actions: [toggle])
+        configuration.performsFirstActionWithFullSwipe = true
+        return configuration
     }
+    
     
     func tableView(
         _ tableView: UITableView,
@@ -174,6 +195,8 @@ private final class Cell: UITableViewCell {
         contentStackView.spacing = 2
         contentStackView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(contentStackView)
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
         
         NSLayoutConstraint.activate([
             contentStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
@@ -182,9 +205,10 @@ private final class Cell: UITableViewCell {
             contentStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
         ])
         
+        titleLabel.textColor = AppColor.white
+        subtitleLabel.textColor = .secondaryLabel
         titleLabel.font = .preferredFont(forTextStyle: .headline)
         subtitleLabel.font = .preferredFont(forTextStyle: .subheadline)
-        subtitleLabel.textColor = .secondaryLabel
         metaLabel.font = .preferredFont(forTextStyle: .caption1)
         metaLabel.textColor = .tertiaryLabel
         metaLabel.numberOfLines = 1
@@ -199,4 +223,11 @@ private final class Cell: UITableViewCell {
         metaLabel.text = viewModel.meta
         accessoryType = viewModel.isDone ? .checkmark : .disclosureIndicator
     }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        preservesSuperviewLayoutMargins = false
+    }
+    
 }

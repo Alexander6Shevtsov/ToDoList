@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		429E47D32E6880600095DC33 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47D22E6880600095DC33 /* AppTheme.swift */; };
+		429E47D52E6880F20095DC33 /* ThemeConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47D42E6880F20095DC33 /* ThemeConfigurator.swift */; };
 		42E974302E61CD2A00879F5B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E974242E61CD2A00879F5B /* AppDelegate.swift */; };
 		42E974312E61CD2A00879F5B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E9742B2E61CD2A00879F5B /* SceneDelegate.swift */; };
 		42E974332E61CD2A00879F5B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E9742D2E61CD2A00879F5B /* ViewController.swift */; };
@@ -45,6 +46,7 @@
 
 /* Begin PBXFileReference section */
 		429E47D22E6880600095DC33 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		429E47D42E6880F20095DC33 /* ThemeConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeConfigurator.swift; sourceTree = "<group>"; };
 		42E973ED2E61C79000879F5B /* ToDoList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToDoList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		42E974062E61C79200879F5B /* ToDoListTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ToDoListTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		42E974102E61C79200879F5B /* ToDoListUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ToDoListUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -142,6 +144,7 @@
 				42E9744F2E65DB3300879F5B /* CDToDo+CoreData.swift */,
 				42E974512E66F3D300879F5B /* ToDoRepository.swift */,
 				429E47D22E6880600095DC33 /* AppTheme.swift */,
+				429E47D42E6880F20095DC33 /* ThemeConfigurator.swift */,
 				42E974282E61CD2A00879F5B /* LaunchScreen.storyboard */,
 				42E9744C2E65BF8F00879F5B /* ToDoList.xcdatamodeld */,
 				42E974252E61CD2A00879F5B /* Assets.xcassets */,
@@ -302,6 +305,7 @@
 				42E974302E61CD2A00879F5B /* AppDelegate.swift in Sources */,
 				42E974312E61CD2A00879F5B /* SceneDelegate.swift in Sources */,
 				42E9744E2E65BF8F00879F5B /* ToDoList.xcdatamodeld in Sources */,
+				429E47D52E6880F20095DC33 /* ThemeConfigurator.swift in Sources */,
 				42E974502E65DB3300879F5B /* CDToDo+CoreData.swift in Sources */,
 				429E47D32E6880600095DC33 /* AppTheme.swift in Sources */,
 				42E974452E658F6D00879F5B /* ToDoListModuleBuilder.swift in Sources */,

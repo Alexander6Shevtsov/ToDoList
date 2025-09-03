@@ -16,7 +16,6 @@ enum AppColor {
     static let red    = UIColor(red: 0xD7/255.0, green: 0x00/255.0, blue: 0x15/255.0, alpha: 1)
 }
 
-// Базовые шрифты (SF системный)
 enum AppFont {
     static func title() -> UIFont { .preferredFont(forTextStyle: .headline) }
     static func subtitle() -> UIFont { .preferredFont(forTextStyle: .subheadline) }

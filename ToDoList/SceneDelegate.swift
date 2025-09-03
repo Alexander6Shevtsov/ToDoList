@@ -17,9 +17,14 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
         
+        ThemeConfigurator.apply()
+        
         let window = UIWindow(windowScene: windowScene)
+        window.tintColor = AppColor.yellow
+        
         let listVC = ToDoListModuleBuilder.build()
         let rootNavigationController = UINavigationController(rootViewController: listVC)
+        
         window.rootViewController = rootNavigationController
         window.makeKeyAndVisible()
         self.window = window
