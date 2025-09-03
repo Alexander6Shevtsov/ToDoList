@@ -11,6 +11,7 @@ final class ToDoListViewController: UIViewController {
     var output: ToDoListViewOutput!
     
     private var items: [ToDoViewModel] = []
+    private let refreshControl = UIRefreshControl()
     
     // UI
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
@@ -34,6 +35,9 @@ final class ToDoListViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
+        refreshControl.addTarget(self, action: #selector(didPullToRefresh), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+        
         // Search
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchResultsUpdater = self
@@ -52,6 +56,11 @@ final class ToDoListViewController: UIViewController {
         output.viewDidLoad()
     }
     
+    @objc private func didPullToRefresh() {
+        output.didSearch(query: "")
+        output.viewDidLoad()
+    }
+    
     @objc private func addTapped() {
         output.didTapAdd()
     }
@@ -66,6 +75,7 @@ extension ToDoListViewController: ToDoListViewInput {
     
     func setLoading(_ isLoading: Bool) {
         isLoading ? activity.startAnimating() : activity.stopAnimating()
+        if !isLoading { refreshControl.endRefreshing() }
     }
     
     func showError(_ message: String) {
@@ -145,17 +155,17 @@ private final class Cell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         accessoryType = .disclosureIndicator
         
-        let vstack = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel, metaLabel])
-        vstack.axis = .vertical
-        vstack.spacing = 2
-        vstack.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(vstack)
+        let contentStackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel, metaLabel])
+        contentStackView.axis = .vertical
+        contentStackView.spacing = 2
+        contentStackView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(contentStackView)
         
         NSLayoutConstraint.activate([
-            vstack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            vstack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            vstack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            vstack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
+            contentStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            contentStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            contentStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            contentStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
         ])
         
         titleLabel.font = .preferredFont(forTextStyle: .headline)
