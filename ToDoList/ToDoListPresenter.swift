@@ -62,7 +62,7 @@ extension ToDoListPresenter: ToDoListViewOutput {
         searchDebounceWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: workItem)
     }
-
+    
     func didSelectItem(id: Int) {
         if let vc = viewController {
             router.openEdit(
