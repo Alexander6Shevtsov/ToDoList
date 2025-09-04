@@ -11,6 +11,13 @@ final class ToDoListInteractor: ToDoListInteractorInput {
     
     weak var output: ToDoListInteractorOutput?
     
+    // MARK: - First launch seed
+    private let seedKey = "didSeedInitialTodos"
+    private var isSeeded: Bool {
+        get { UserDefaults.standard.bool(forKey: seedKey) }
+        set { UserDefaults.standard.set(newValue, forKey: seedKey) }
+    }
+    
     private let apiClient: ToDosAPIClient
     private let userDefaults: UserDefaults
     private let repository: ToDoRepository
@@ -38,52 +45,23 @@ final class ToDoListInteractor: ToDoListInteractorInput {
     // MARK: - ToDoListInteractorInput
     func initialLoad() {
         output?.didChangeLoading(true)
-        operationQueue.addOperation { [weak self] in
-            guard let self else { return }
-            
-            self.repository.fetchAll { [weak self] result in
+        if !isSeeded {
+            apiClient.fetchAll { [weak self] result in
                 guard let self else { return }
                 switch result {
-                case .success(let items) where items.isEmpty == false:
-                    self.notify(items: items)
-                    self.notifyLoading(false)
-                    
-                case .success:
-                    self.apiClient.fetchAll { [weak self] apiResult in
-                        guard let self else { return }
-                        switch apiResult {
-                        case .success(let entities):
-                            self.repository.upsert(entities) { [weak self] upsertResult in
-                                guard let self else { return }
-                                switch upsertResult {
-                                case .success:
-                                    self.userDefaults.set(true, forKey: self.seededKey)
-                                    self.repository.fetchAll { [weak self] fetch2 in
-                                        guard let self else { return }
-                                        switch fetch2 {
-                                        case .success(let items2):
-                                            self.notify(items: items2)
-                                        case .failure(let error):
-                                            self.notifyError(error)
-                                        }
-                                        self.notifyLoading(false)
-                                    }
-                                case .failure(let error):
-                                    self.notifyError(error)
-                                    self.notifyLoading(false)
-                                }
-                            }
-                        case .failure(let error):
-                            self.notifyError(error)
-                            self.notifyLoading(false)
-                        }
+                case .success(let items):
+                    self.repository.replaceAll(with: items) { _ in
+                        self.isSeeded = true
+                        self.fetchAll() // покажем из БД
                     }
-                    
                 case .failure(let error):
-                    self.notifyError(error)
-                    self.notifyLoading(false)
+                    self.output?.didChangeLoading(false)
+                    self.output?.didFail(error: error)
+                    self.fetchAll() // fallback: что есть в БД
                 }
             }
+        } else {
+            fetchAll()
         }
     }
     
