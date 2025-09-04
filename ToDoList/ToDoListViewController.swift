@@ -27,7 +27,6 @@ final class ToDoListViewController: UIViewController {
         return label
     }()
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "ToDos"
@@ -35,6 +34,7 @@ final class ToDoListViewController: UIViewController {
         
         tableView.backgroundColor = AppColor.black
         tableView.separatorColor = AppColor.stroke
+        tableView.separatorInsetReference = .fromCellEdges
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
@@ -75,11 +75,11 @@ final class ToDoListViewController: UIViewController {
         navigationItem.searchController = searchController
         definesPresentationContext = true
         
-        let stf = searchController.searchBar.searchTextField
-        stf.textColor = AppColor.white
-        stf.tintColor = AppColor.yellow
-        stf.backgroundColor = AppColor.gray
-        stf.attributedPlaceholder = NSAttributedString(
+        let searchTextField = searchController.searchBar.searchTextField
+        searchTextField.textColor = AppColor.white
+        searchTextField.tintColor = AppColor.yellow
+        searchTextField.backgroundColor = AppColor.gray
+        searchTextField.attributedPlaceholder = NSAttributedString(
             string: "Search",
             attributes: [.foregroundColor: UIColor.secondaryLabel]
         )
@@ -103,6 +103,7 @@ final class ToDoListViewController: UIViewController {
     }
     
     @objc private func didPullToRefresh() {
+        searchController.isActive = false
         searchController.searchBar.text = ""
         output.viewDidLoad()
     }
@@ -116,9 +117,11 @@ final class ToDoListViewController: UIViewController {
 // MARK: - ViewInput
 extension ToDoListViewController: ToDoListViewInput {
     func display(items: [ToDoViewModel]) {
-        self.items = items
-        tableView.reloadData()
-        updateEmptyState()
+        DispatchQueue.main.async {
+            self.items = items
+            self.tableView.reloadData()
+            self.updateEmptyState()
+        }
     }
     
     func setLoading(_ isLoading: Bool) {
