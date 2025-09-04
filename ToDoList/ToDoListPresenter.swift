@@ -14,24 +14,30 @@ final class ToDoListPresenter {
     private weak var viewController: UIViewController?
     private let interactor: ToDoListInteractorInput
     private let router: ToDoListRouterInput
+    private let searchDebounce: TimeInterval
     private var searchDebounceWorkItem: DispatchWorkItem?
     
     // MARK: - State
-    private let dateFormatter: DateFormatter = {
+    private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
+        formatter.locale = Locale.current
         return formatter
     }()
     
     // MARK: - Init
-    init(view: ToDoListViewInput & UIViewController,
-         interactor: ToDoListInteractorInput,
-         router: ToDoListRouterInput) {
+    init(
+        view: ToDoListViewInput & UIViewController,
+        interactor: ToDoListInteractorInput,
+        router: ToDoListRouterInput,
+        searchDebounce: TimeInterval = 0.3
+    ) {
         self.view = view
         self.viewController = view
         self.interactor = interactor
         self.router = router
+        self.searchDebounce = searchDebounce
     }
     
     // MARK: - Mapping
@@ -56,11 +62,15 @@ extension ToDoListPresenter: ToDoListViewOutput {
     func didDelete(id: Int) { interactor.delete(id: id) }
     func didSearch(query: String) {
         searchDebounceWorkItem?.cancel()
-        let workItem = DispatchWorkItem { [weak self] in
+        if searchDebounce <= 0 {
+            interactor.search(query: query)
+            return
+        }
+        let work = DispatchWorkItem { [weak self] in
             self?.interactor.search(query: query)
         }
-        searchDebounceWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: workItem)
+        searchDebounceWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + searchDebounce, execute: work)
     }
     
     func didSelectItem(id: Int) {
@@ -72,7 +82,6 @@ extension ToDoListPresenter: ToDoListViewOutput {
         }
     }
 }
-
 
 // MARK: - Interactor → Presenter
 extension ToDoListPresenter: ToDoListInteractorOutput {

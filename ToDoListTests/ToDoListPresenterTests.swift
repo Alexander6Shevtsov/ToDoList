@@ -54,7 +54,7 @@ final class ToDoListPresenterTests: XCTestCase {
         let view = MockViewController()
         let interactor = MockInteractor()
         let router = MockRouter()
-        let presenter = ToDoListPresenter(view: view, interactor: interactor, router: router)
+        let presenter = ToDoListPresenter(view: view, interactor: interactor, router: router, searchDebounce: 0)
         return (presenter, view, interactor, router)
     }
 
