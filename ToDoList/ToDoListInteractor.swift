@@ -11,11 +11,11 @@ final class ToDoListInteractor: ToDoListInteractorInput {
     
     weak var output: ToDoListInteractorOutput?
     
-    // MARK: - First launch seed
-    private let seedKey = "didSeedInitialTodos"
-    private var isSeeded: Bool {
-        get { UserDefaults.standard.bool(forKey: seedKey) }
-        set { UserDefaults.standard.set(newValue, forKey: seedKey) }
+    // MARK: - First-launch seed flag
+    private let seedFlagKey = "seededOnce"
+    private var hasSeeded: Bool {
+        get { userDefaults.bool(forKey: seedFlagKey) }
+        set { userDefaults.set(newValue, forKey: seedFlagKey) }
     }
     
     private let apiClient: ToDosAPIClient
@@ -45,24 +45,24 @@ final class ToDoListInteractor: ToDoListInteractorInput {
     // MARK: - ToDoListInteractorInput
     func initialLoad() {
         output?.didChangeLoading(true)
-        if !isSeeded {
+        if !hasSeeded && repository.isStoreEmpty() {
             apiClient.fetchAll { [weak self] result in
                 guard let self else { return }
                 switch result {
                 case .success(let items):
-                    self.repository.replaceAll(with: items) { _ in
-                        self.isSeeded = true
-                        self.fetchAll() // покажем из БД
+                    self.repository.replaceAll(with: items) { [weak self] _ in
+                        guard let self else { return }
+                        self.hasSeeded = true
+                        self.fetchAll()
                     }
                 case .failure(let error):
-                    self.output?.didChangeLoading(false)
                     self.output?.didFail(error: error)
-                    self.fetchAll() // fallback: что есть в БД
+                    self.fetchAll()
                 }
             }
-        } else {
-            fetchAll()
+            return
         }
+        fetchAll()
     }
     
     func fetchAll() {

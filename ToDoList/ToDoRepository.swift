@@ -157,6 +157,23 @@ final class ToDoRepository {
         }
     }
     
+    // MARK: - Introspection
+    func isStoreEmpty() -> Bool {
+        let viewContext = persistentContainer.viewContext
+        var result = true
+        viewContext.performAndWait {
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "CDToDo")
+            request.fetchLimit = 1
+            do {
+                result = try viewContext.count(for: request) == 0
+            } catch {
+                result = true
+            }
+        }
+        return result
+    }
+    
+    
     // MARK: - Helpers
     private func performBackground<T>(
         _ work: @escaping (
