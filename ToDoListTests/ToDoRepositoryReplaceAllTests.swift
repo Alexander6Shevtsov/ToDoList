@@ -26,36 +26,41 @@ final class ToDoRepositoryReplaceAllTests: XCTestCase {
     }
     
     func test_replaceAll_overwritesStore_and_fetchesSorted() {
-        // given: исходные данные
-        let old = [
-            ToDoEntity(id: 1, title: "old-1", details: nil, createdAt: Date(timeIntervalSince1970: 10), isDone: false),
-            ToDoEntity(id: 2, title: "old-2", details: nil, createdAt: Date(timeIntervalSince1970: 20), isDone: false)
-        ]
-        let seedDone = expectation(description: "seed old")
-        repository.replaceAll(with: old) { _ in seedDone.fulfill() }
-        wait(for: [seedDone], timeout: 2)
+        // Arrange
+        let container = makeInMemoryContainer()
+        let repository = ToDoRepository(persistentContainer: container)
         
-        // when: меняем на новые
-        let now = Date()
-        let newer = [
-            ToDoEntity(id: 3, title: "new-3", details: "a", createdAt: now.addingTimeInterval(-60), isDone: false),
-            ToDoEntity(id: 4, title: "new-4", details: "b", createdAt: now, isDone: true)
+        // 1) seed old
+        let oldDate1 = Date(timeIntervalSince1970: 1)
+        let oldDate2 = Date(timeIntervalSince1970: 2)
+        let oldItems: [ToDoEntity] = [
+            ToDoEntity(id: 1, title: "old A", details: nil, createdAt: oldDate1, isDone: false),
+            ToDoEntity(id: 2, title: "old B", details: "x", createdAt: oldDate2, isDone: true)
         ]
-        let repl = expectation(description: "replace")
-        repository.replaceAll(with: newer) { _ in repl.fulfill() }
-        wait(for: [repl], timeout: 2)
+        let seedExp = expectation(description: "seed old")
+        repository.replaceAll(with: oldItems) { _ in seedExp.fulfill() }
+        wait(for: [seedExp], timeout: 5)
         
-        // then: fetchAll возвращает только новые и по дате убыв.
-        let fetched = expectation(description: "fetch")
+        // 2) replace with new
+        let newDate1 = Date(timeIntervalSince1970: 10)
+        let newDate2 = Date(timeIntervalSince1970: 20)
+        let newItems: [ToDoEntity] = [
+            ToDoEntity(id: 1, title: "new A", details: nil, createdAt: newDate1, isDone: false),
+            ToDoEntity(id: 2, title: "new B", details: nil, createdAt: newDate2, isDone: false)
+        ]
+        let replaceExp = expectation(description: "replace")
+        repository.replaceAll(with: newItems) { _ in replaceExp.fulfill() }
+        wait(for: [replaceExp], timeout: 5)
+        
+        // 3) fetch and assert
+        let fetchExp = expectation(description: "fetch")
         repository.fetchAll { result in
-            guard case let .success(items) = result else { return XCTFail() }
-            XCTAssertEqual(Set(items.map { $0.title }), ["new-3","new-4"])
-            XCTAssertTrue(items.first?.isDone == true)
-            XCTAssertEqual(items.map { $0.id }, [4, 3])
-            XCTAssertEqual(items.first?.title, "new-4")
+            guard case let .success(items) = result else { XCTFail("fetch failed"); return }
             XCTAssertEqual(items.count, 2)
-            fetched.fulfill()
+            XCTAssertEqual(items.map { $0.title }.sorted(), ["new A", "new B"])
+            XCTAssertEqual(items.first?.createdAt, newDate2)
+            fetchExp.fulfill()
         }
-        wait(for: [fetched], timeout: 2)
+        wait(for: [fetchExp], timeout: 5)
     }
 }

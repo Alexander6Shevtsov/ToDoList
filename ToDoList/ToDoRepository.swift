@@ -119,14 +119,11 @@ final class ToDoRepository {
             do {
                 let storeType = backgroundContext.persistentStoreCoordinator?.persistentStores.first?.type
                 if storeType == NSInMemoryStoreType {
-                    // In-memory: обычное удаление
                     let fetch = NSFetchRequest<NSManagedObject>(entityName: "CDToDo")
                     fetch.includesPropertyValues = false
                     let all = try backgroundContext.fetch(fetch)
                     all.forEach { backgroundContext.delete($0) }
-                    // viewContext подтянет изменения из-за automaticallyMergesChangesFromParent
                 } else {
-                    // SQLite: быстрая пакетная очистка
                     let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "CDToDo")
                     let delete = NSBatchDeleteRequest(fetchRequest: fetch)
                     delete.resultType = .resultTypeObjectIDs
@@ -139,7 +136,6 @@ final class ToDoRepository {
                     }
                 }
                 
-                // Вставка новых записей
                 for item in items {
                     let cdToDo = CDToDo(context: backgroundContext)
                     cdToDo.id        = Int64(item.id)
@@ -150,9 +146,9 @@ final class ToDoRepository {
                 }
                 
                 try backgroundContext.save()
-                DispatchQueue.main.async { completion(.success(())) }
+                completion(.success(()))
             } catch {
-                DispatchQueue.main.async { completion(.failure(error)) }
+                completion(.failure(error))
             }
         }
     }
