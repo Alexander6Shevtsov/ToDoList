@@ -12,10 +12,11 @@ final class ToDoListViewController: UIViewController {
     
     private var items: [ToDoViewModel] = []
     private let refreshControl = UIRefreshControl()
+    private let activityIndicator = UIActivityIndicatorView(style: .medium)
+    private var addButton: UIBarButtonItem?
     
     // UI
     private let tableView = UITableView(frame: .zero, style: .plain)
-    private let activity = UIActivityIndicatorView(style: .medium)
     private let searchController = UISearchController(searchResultsController: nil)
     private let emptyStateLabel: UILabel = {
         let label = UILabel()
@@ -84,14 +85,16 @@ final class ToDoListViewController: UIViewController {
             attributes: [.foregroundColor: UIColor.secondaryLabel]
         )
         
-        activity.hidesWhenStopped = true
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: activity)
-        
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
+        let addBarButton = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
             action: #selector(didTapAdd)
         )
+        addBarButton.tintColor = AppColor.yellow
+        navigationItem.rightBarButtonItem = addBarButton
+        addButton = addBarButton
+        
+        activityIndicator.hidesWhenStopped = true
         
         output.viewDidLoad()
     }
@@ -116,6 +119,7 @@ final class ToDoListViewController: UIViewController {
 
 // MARK: - ViewInput
 extension ToDoListViewController: ToDoListViewInput {
+    
     func display(items: [ToDoViewModel]) {
         DispatchQueue.main.async {
             self.items = items
@@ -125,18 +129,32 @@ extension ToDoListViewController: ToDoListViewInput {
     }
     
     func setLoading(_ isLoading: Bool) {
-        isLoading ? activity.startAnimating() : activity.stopAnimating()
-        if !isLoading { refreshControl.endRefreshing() }
+        DispatchQueue.main.async {
+            if isLoading {
+                self.activityIndicator.startAnimating()
+                self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: self.activityIndicator)
+            } else {
+                self.activityIndicator.stopAnimating()
+                self.navigationItem.rightBarButtonItem = self.addButton
+            }
+            self.refreshControl.endRefreshing()
+        }
+    }
+    
+    func didChangeLoading(_ isLoading: Bool) {
+        setLoading(isLoading)
     }
     
     func showError(_ message: String) {
-        let alert = UIAlertController(
-            title: "Error",
-            message: message,
-            preferredStyle: .alert
-        )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
+        DispatchQueue.main.async {
+            let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            self.present(alert, animated: true)
+        }
+    }
+    
+    func didFail(error: Error) {
+        showError(error.localizedDescription)
     }
 }
 
@@ -161,8 +179,8 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let id = items[indexPath.row].id
-        output.didSelectItem(id: id)
+        let todoId = items[indexPath.row].id
+        output.didSelectItem(id: todoId)
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -172,11 +190,11 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
         leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
         let item = items[indexPath.row]
-        let id = item.id
+        let todoId = item.id
         let actionTitle = item.isDone ? "Undo" : "Done"
         
         let toggle = UIContextualAction(style: .normal, title: actionTitle) { [weak self] _,_, done in
-            self?.output.didToggleDone(id: id)
+            self?.output.didToggleDone(id: todoId)
             done(true)
         }
         
@@ -185,18 +203,17 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
         return configuration
     }
     
-    
     func tableView(
         _ tableView: UITableView,
         trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
-        let id = items[indexPath.row].id
+        let todoId = items[indexPath.row].id
         let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _,_, done in
-            self?.output.didDelete(id: id); done(true)
+            self?.output.didDelete(id: todoId); done(true)
         }
-        let cfg = UISwipeActionsConfiguration(actions: [delete])
-        cfg.performsFirstActionWithFullSwipe = true
-        return cfg
+        let swipeConfig = UISwipeActionsConfiguration(actions: [delete])
+        swipeConfig.performsFirstActionWithFullSwipe = true
+        return swipeConfig
     }
 }
 
@@ -255,7 +272,5 @@ private final class Cell: UITableViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        preservesSuperviewLayoutMargins = false
     }
 }
