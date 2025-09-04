@@ -23,7 +23,6 @@ VIPER-модуль `ToDoList`:
 - Фоновая обработка операций
 
 ## Тесты
-`⌘U`  
 - API: `ToDosAPIClientTests` (успех, HTTP-ошибка)  
 - Repository: `ToDoRepositoryTests`, `ToDoRepositoryReplaceAllTests` (in-memory CoreData)  
 - Presenter: `ToDoListPresenterTests` (load/map/display, роутинг, форвардинг, loading/error)  
