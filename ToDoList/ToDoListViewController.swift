@@ -17,6 +17,16 @@ final class ToDoListViewController: UIViewController {
     private let tableView = UITableView(frame: .zero, style: .plain)
     private let activity = UIActivityIndicatorView(style: .medium)
     private let searchController = UISearchController(searchResultsController: nil)
+    private let emptyStateLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Нет задач"
+        label.textAlignment = .center
+        label.textColor = .secondaryLabel
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,6 +42,15 @@ final class ToDoListViewController: UIViewController {
         tableView.register(Cell.self, forCellReuseIdentifier: Cell.reuseId)
         tableView.keyboardDismissMode = .onDrag
         view.addSubview(tableView)
+        
+        view.addSubview(emptyStateLabel)
+        NSLayoutConstraint.activate([
+            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            emptyStateLabel.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 24),
+            emptyStateLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -24)
+        ])
+        emptyStateLabel.isHidden = true
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -77,6 +96,12 @@ final class ToDoListViewController: UIViewController {
         output.viewDidLoad()
     }
     
+    private func updateEmptyState() {
+        let isEmpty = items.isEmpty
+        emptyStateLabel.isHidden = !isEmpty
+        tableView.isHidden = isEmpty
+    }
+    
     @objc private func didPullToRefresh() {
         searchController.searchBar.text = ""
         output.viewDidLoad()
@@ -93,6 +118,7 @@ extension ToDoListViewController: ToDoListViewInput {
     func display(items: [ToDoViewModel]) {
         self.items = items
         tableView.reloadData()
+        updateEmptyState()
     }
     
     func setLoading(_ isLoading: Bool) {
@@ -229,5 +255,4 @@ private final class Cell: UITableViewCell {
         separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         preservesSuperviewLayoutMargins = false
     }
-    
 }
