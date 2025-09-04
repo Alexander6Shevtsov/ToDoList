@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		429E47D32E6880600095DC33 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47D22E6880600095DC33 /* AppTheme.swift */; };
 		429E47D52E6880F20095DC33 /* ThemeConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47D42E6880F20095DC33 /* ThemeConfigurator.swift */; };
+		429E47E22E698ED30095DC33 /* TestCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47DC2E698ED30095DC33 /* TestCoreData.swift */; };
+		429E47E32E698ED30095DC33 /* ToDoListPresenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47DD2E698ED30095DC33 /* ToDoListPresenterTests.swift */; };
+		429E47E42E698ED30095DC33 /* ToDoRepositoryReplaceAllTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47DE2E698ED30095DC33 /* ToDoRepositoryReplaceAllTests.swift */; };
+		429E47E52E698ED30095DC33 /* ToDoRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47DF2E698ED30095DC33 /* ToDoRepositoryTests.swift */; };
+		429E47E62E698ED30095DC33 /* ToDosAPIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47E02E698ED30095DC33 /* ToDosAPIClientTests.swift */; };
 		42E974302E61CD2A00879F5B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E974242E61CD2A00879F5B /* AppDelegate.swift */; };
 		42E974312E61CD2A00879F5B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E9742B2E61CD2A00879F5B /* SceneDelegate.swift */; };
 		42E974332E61CD2A00879F5B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E9742D2E61CD2A00879F5B /* ViewController.swift */; };
@@ -47,6 +52,11 @@
 /* Begin PBXFileReference section */
 		429E47D22E6880600095DC33 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		429E47D42E6880F20095DC33 /* ThemeConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeConfigurator.swift; sourceTree = "<group>"; };
+		429E47DC2E698ED30095DC33 /* TestCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCoreData.swift; sourceTree = "<group>"; };
+		429E47DD2E698ED30095DC33 /* ToDoListPresenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListPresenterTests.swift; sourceTree = "<group>"; };
+		429E47DE2E698ED30095DC33 /* ToDoRepositoryReplaceAllTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoRepositoryReplaceAllTests.swift; sourceTree = "<group>"; };
+		429E47DF2E698ED30095DC33 /* ToDoRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoRepositoryTests.swift; sourceTree = "<group>"; };
+		429E47E02E698ED30095DC33 /* ToDosAPIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDosAPIClientTests.swift; sourceTree = "<group>"; };
 		42E973ED2E61C79000879F5B /* ToDoList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToDoList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		42E974062E61C79200879F5B /* ToDoListTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ToDoListTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		42E974102E61C79200879F5B /* ToDoListUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ToDoListUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -70,11 +80,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		42E974092E61C79200879F5B /* ToDoListTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ToDoListTests;
-			sourceTree = "<group>";
-		};
 		42E974132E61C79200879F5B /* ToDoListUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = ToDoListUITests;
@@ -107,11 +112,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		429E47E12E698ED30095DC33 /* ToDoListTests */ = {
+			isa = PBXGroup;
+			children = (
+				429E47DD2E698ED30095DC33 /* ToDoListPresenterTests.swift */,
+				429E47DE2E698ED30095DC33 /* ToDoRepositoryReplaceAllTests.swift */,
+				429E47DF2E698ED30095DC33 /* ToDoRepositoryTests.swift */,
+				429E47E02E698ED30095DC33 /* ToDosAPIClientTests.swift */,
+				429E47DC2E698ED30095DC33 /* TestCoreData.swift */,
+			);
+			path = ToDoListTests;
+			sourceTree = "<group>";
+		};
 		42E973E42E61C79000879F5B = {
 			isa = PBXGroup;
 			children = (
 				42E9742E2E61CD2A00879F5B /* ToDoList */,
-				42E974092E61C79200879F5B /* ToDoListTests */,
+				429E47E12E698ED30095DC33 /* ToDoListTests */,
 				42E974132E61C79200879F5B /* ToDoListUITests */,
 				42E973EE2E61C79000879F5B /* Products */,
 			);
@@ -187,9 +204,6 @@
 			);
 			dependencies = (
 				42E974082E61C79200879F5B /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				42E974092E61C79200879F5B /* ToDoListTests */,
 			);
 			name = ToDoListTests;
 			packageProductDependencies = (
@@ -320,6 +334,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				429E47E22E698ED30095DC33 /* TestCoreData.swift in Sources */,
+				429E47E32E698ED30095DC33 /* ToDoListPresenterTests.swift in Sources */,
+				429E47E42E698ED30095DC33 /* ToDoRepositoryReplaceAllTests.swift in Sources */,
+				429E47E52E698ED30095DC33 /* ToDoRepositoryTests.swift in Sources */,
+				429E47E62E698ED30095DC33 /* ToDosAPIClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

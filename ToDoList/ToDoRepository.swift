@@ -113,29 +113,40 @@ final class ToDoRepository {
     
     func replaceAll(with items: [ToDoEntity], completion: @escaping (Result<Void, Error>) -> Void) {
         let backgroundContext = persistentContainer.newBackgroundContext()
-        backgroundContext.undoManager = nil
         backgroundContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-        
+        backgroundContext.undoManager = nil
         backgroundContext.perform {
             do {
-                let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "CDToDo")
-                let delete = NSBatchDeleteRequest(fetchRequest: fetch)
-                delete.resultType = .resultTypeObjectIDs
-                let result = try backgroundContext.execute(delete) as? NSBatchDeleteResult
-                if let ids = result?.result as? [NSManagedObjectID] {
-                    NSManagedObjectContext.mergeChanges(
-                        fromRemoteContextSave: [NSDeletedObjectsKey: ids],
-                        into: [self.persistentContainer.viewContext]
-                    )
+                let storeType = backgroundContext.persistentStoreCoordinator?.persistentStores.first?.type
+                if storeType == NSInMemoryStoreType {
+                    // In-memory: обычное удаление
+                    let fetch = NSFetchRequest<NSManagedObject>(entityName: "CDToDo")
+                    fetch.includesPropertyValues = false
+                    let all = try backgroundContext.fetch(fetch)
+                    all.forEach { backgroundContext.delete($0) }
+                    // viewContext подтянет изменения из-за automaticallyMergesChangesFromParent
+                } else {
+                    // SQLite: быстрая пакетная очистка
+                    let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "CDToDo")
+                    let delete = NSBatchDeleteRequest(fetchRequest: fetch)
+                    delete.resultType = .resultTypeObjectIDs
+                    if let result = try backgroundContext.execute(delete) as? NSBatchDeleteResult,
+                       let ids = result.result as? [NSManagedObjectID] {
+                        NSManagedObjectContext.mergeChanges(
+                            fromRemoteContextSave: [NSDeletedObjectsKey: ids],
+                            into: [self.persistentContainer.viewContext]
+                        )
+                    }
                 }
                 
+                // Вставка новых записей
                 for item in items {
-                    let obj = CDToDo(context: backgroundContext)
-                    obj.id        = Int64(item.id)
-                    obj.title     = item.title
-                    obj.details   = item.details
-                    obj.createdAt = item.createdAt
-                    obj.isDone    = item.isDone
+                    let cdToDo = CDToDo(context: backgroundContext)
+                    cdToDo.id        = Int64(item.id)
+                    cdToDo.title     = item.title
+                    cdToDo.details   = item.details
+                    cdToDo.createdAt = item.createdAt
+                    cdToDo.isDone    = item.isDone
                 }
                 
                 try backgroundContext.save()
