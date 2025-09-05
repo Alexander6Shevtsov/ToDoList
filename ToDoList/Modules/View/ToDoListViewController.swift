@@ -10,14 +10,17 @@ import UIKit
 final class ToDoListViewController: UIViewController {
     var output: ToDoListViewOutput!
     
+    // State
     private var items: [ToDoViewModel] = []
-    private let refreshControl = UIRefreshControl()
-    private let activityIndicator = UIActivityIndicatorView(style: .medium)
-    private var addButton: UIBarButtonItem?
     
     // UI
     private let tableView = UITableView(frame: .zero, style: .plain)
+    private let refreshControl = UIRefreshControl()
+    private let activityIndicator = UIActivityIndicatorView(style: .medium)
+    private var addButton: UIBarButtonItem?
+    private let cellReuseId = "todoCell"
     private let searchController = UISearchController(searchResultsController: nil)
+    
     private let emptyStateLabel: UILabel = {
         let label = UILabel()
         label.text = "Нет задач"
@@ -33,6 +36,7 @@ final class ToDoListViewController: UIViewController {
         title = "ToDos"
         view.backgroundColor = AppColor.black
         
+        // Table
         tableView.backgroundColor = AppColor.black
         tableView.separatorColor = AppColor.stroke
         tableView.separatorInsetReference = .fromCellEdges
@@ -40,10 +44,20 @@ final class ToDoListViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(Cell.self, forCellReuseIdentifier: Cell.reuseId)
         tableView.keyboardDismissMode = .onDrag
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 64
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellReuseId)
         view.addSubview(tableView)
         
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        // Empty state
         view.addSubview(emptyStateLabel)
         NSLayoutConstraint.activate([
             emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -53,26 +67,16 @@ final class ToDoListViewController: UIViewController {
         ])
         emptyStateLabel.isHidden = true
         
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        
+        // Pull-to-refresh
         tableView.refreshControl = refreshControl
-        refreshControl.addTarget(
-            self,
-            action: #selector(
-                didPullToRefresh
-            ),
-            for: .valueChanged
-        )
+        refreshControl.addTarget(self, action: #selector(didPullToRefresh), for: .valueChanged)
         
         // Search
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchResultsUpdater = self
         searchController.searchBar.overrideUserInterfaceStyle = .dark
+        searchController.obscuresBackgroundDuringPresentation = false
+        definesPresentationContext = true
         navigationItem.searchController = searchController
         definesPresentationContext = true
         
@@ -85,15 +89,11 @@ final class ToDoListViewController: UIViewController {
             attributes: [.foregroundColor: UIColor.secondaryLabel]
         )
         
-        let addBarButton = UIBarButtonItem(
-            barButtonSystemItem: .add,
-            target: self,
-            action: #selector(didTapAdd)
-        )
+        // Add button / loader
+        let addBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAdd))
         addBarButton.tintColor = AppColor.yellow
         navigationItem.rightBarButtonItem = addBarButton
         addButton = addBarButton
-        
         activityIndicator.hidesWhenStopped = true
         
         output.viewDidLoad()
@@ -111,13 +111,12 @@ final class ToDoListViewController: UIViewController {
         output.viewDidLoad()
     }
     
-    // MARK: - Actions
     @objc private func didTapAdd() {
         output.didTapAdd()
     }
 }
 
-// MARK: - ViewInput
+// MARK: - ToDoListViewInput
 extension ToDoListViewController: ToDoListViewInput {
     
     func display(items: [ToDoViewModel]) {
@@ -158,23 +157,32 @@ extension ToDoListViewController: ToDoListViewInput {
     }
 }
 
-// MARK: - Table DS/Delegate
+// MARK: - UITableViewDataSource / UITableViewDelegate
 extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
     
-    func tableView(
-        _ tableView: UITableView,
-        numberOfRowsInSection section: Int
-    ) -> Int { items.count }
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { items.count }
     
-    func tableView(
-        _ tableView: UITableView,
-        cellForRowAt indexPath: IndexPath
-    ) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
-            withIdentifier: Cell.reuseId,
-            for: indexPath
-        ) as! Cell
-        cell.configure(with: items[indexPath.row])
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let viewModel = items[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellReuseId)
+        ?? UITableViewCell(style: .subtitle, reuseIdentifier: cellReuseId)
+        
+        var content = cell.defaultContentConfiguration()
+        content.textProperties.color = AppColor.white
+        content.textProperties.numberOfLines = 1
+        content.secondaryTextProperties.color = UIColor(white: 1, alpha: 0.7)
+        content.secondaryTextProperties.numberOfLines = 2
+
+        content.text = viewModel.title
+        content.secondaryText = viewModel.subtitle ?? viewModel.meta
+        cell.contentConfiguration = content
+        
+        cell.accessoryType = (viewModel.subtitle?.isEmpty == false) ? .disclosureIndicator : .none
+        cell.selectionStyle = .none
+        cell.tintColor = AppColor.yellow
+        cell.backgroundColor = .clear
+        cell.backgroundColor = AppColor.black
+
         return cell
     }
     
@@ -184,93 +192,39 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    // Свайпы
-    func tableView(
-        _ tableView: UITableView,
-        leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
-    ) -> UISwipeActionsConfiguration? {
+    // Swipe Done/Undo
+    func tableView(_ tableView: UITableView,
+                   leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let item = items[indexPath.row]
         let todoId = item.id
         let actionTitle = item.isDone ? "Undo" : "Done"
         
-        let toggle = UIContextualAction(style: .normal, title: actionTitle) { [weak self] _,_, done in
+        let toggle = UIContextualAction(style: .normal, title: actionTitle) { [weak self] _, _, finish in
             self?.output.didToggleDone(id: todoId)
-            done(true)
+            finish(true)
         }
-        
-        let configuration = UISwipeActionsConfiguration(actions: [toggle])
-        configuration.performsFirstActionWithFullSwipe = true
-        return configuration
+        let config = UISwipeActionsConfiguration(actions: [toggle])
+        config.performsFirstActionWithFullSwipe = true
+        return config
     }
     
-    func tableView(
-        _ tableView: UITableView,
-        trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
-    ) -> UISwipeActionsConfiguration? {
+    // Swipe Delete
+    func tableView(_ tableView: UITableView,
+                   trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let todoId = items[indexPath.row].id
-        let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _,_, done in
-            self?.output.didDelete(id: todoId); done(true)
+        let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, finish in
+            self?.output.didDelete(id: todoId)
+            finish(true)
         }
-        let swipeConfig = UISwipeActionsConfiguration(actions: [delete])
-        swipeConfig.performsFirstActionWithFullSwipe = true
-        return swipeConfig
+        let config = UISwipeActionsConfiguration(actions: [delete])
+        config.performsFirstActionWithFullSwipe = true
+        return config
     }
 }
 
-// MARK: - Search
+// MARK: - UISearchResultsUpdating
 extension ToDoListViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         output.didSearch(query: searchController.searchBar.text ?? "")
-    }
-}
-
-// MARK: - Ячейка
-private final class Cell: UITableViewCell {
-    static let reuseId = "Cell"
-    
-    private let titleLabel = UILabel()
-    private let subtitleLabel = UILabel()
-    private let metaLabel = UILabel()
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        accessoryType = .disclosureIndicator
-        
-        let contentStackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel, metaLabel])
-        contentStackView.axis = .vertical
-        contentStackView.spacing = 2
-        contentStackView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(contentStackView)
-        backgroundColor = .clear
-        contentView.backgroundColor = .clear
-        
-        NSLayoutConstraint.activate([
-            contentStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            contentStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            contentStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            contentStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
-        ])
-        
-        titleLabel.textColor = AppColor.white
-        subtitleLabel.textColor = .secondaryLabel
-        titleLabel.font = .preferredFont(forTextStyle: .headline)
-        subtitleLabel.font = .preferredFont(forTextStyle: .subheadline)
-        metaLabel.font = .preferredFont(forTextStyle: .caption1)
-        metaLabel.textColor = .tertiaryLabel
-        metaLabel.numberOfLines = 1
-    }
-    
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-    
-    func configure(with viewModel: ToDoViewModel) {
-        titleLabel.text = viewModel.title
-        subtitleLabel.isHidden = (viewModel.subtitle ?? "").isEmpty
-        subtitleLabel.text = viewModel.subtitle
-        metaLabel.text = viewModel.meta
-        accessoryType = viewModel.isDone ? .checkmark : .disclosureIndicator
-    }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
     }
 }
