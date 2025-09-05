@@ -23,14 +23,13 @@ protocol ToDoListViewOutput: AnyObject {
     func didSearch(query: String)
 }
 
-// MARK: Interactor
+// MARK: - Interactor
 protocol ToDoListInteractorInput: AnyObject {
     func initialLoad()
     func fetchAll()
     func search(query: String)
     func toggleDone(id: Int)
     func delete(id: Int)
-    
     func create(title: String, details: String?)
     func update(id: Int, title: String, details: String?)
 }
@@ -48,8 +47,20 @@ extension ToDoListInteractorInput {
 
 // MARK: - Router
 protocol ToDoListRouterInput: AnyObject {
-    func openCreate(from: UIViewController)
-    func openEdit(id: Int, from: UIViewController)
+    func openCreate(
+        from: UIViewController,
+        onSave: @escaping (_ title: String, _ details: String?) -> Void
+    )
+    
+    func openEdit(
+        id: Int,
+        title: String,
+        details: String?,
+        date: Date,
+        from: UIViewController,
+        onSave: @escaping (_ title: String, _ details: String?) -> Void
+    )
+    
     func openDetails(
         model: ToDoDetailsModel,
         from: UIViewController,

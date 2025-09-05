@@ -46,21 +46,49 @@ final class ToDoListPresenterTests: XCTestCase {
         }
     }
     
-    private final class MockRouter: ToDoListRouterInput {
+    final class MockRouter: ToDoListRouterInput {
+        // счётчики + последние параметры
         var openCreateCallCount = 0
         var openEditCallCount = 0
-        weak var lastFrom: UIViewController?
+        var openDetailsCallCount = 0
+        var lastFrom: UIViewController?
         var lastEditId: Int?
+        var lastDetailsModel: ToDoDetailsModel?
+        // захват колбэка "Редактировать" из листа
+        var capturedOnEdit: ((Int) -> Void)?
         
-        func openCreate(from: UIViewController) {
+        func openCreate(
+            from: UIViewController,
+            onSave: @escaping (String, String?) -> Void
+        ) {
             openCreateCallCount += 1
             lastFrom = from
         }
         
-        func openEdit(id: Int, from: UIViewController) {
+        func openEdit(
+            id: Int,
+            title: String,
+            details: String?,
+            date: Date,
+            from: UIViewController,
+            onSave: @escaping (String, String?) -> Void
+        ) {
             openEditCallCount += 1
             lastEditId = id
             lastFrom = from
+        }
+        
+        func openDetails(
+            model: ToDoDetailsModel,
+            from: UIViewController,
+            onEdit: @escaping (Int) -> Void,
+            onDelete: @escaping (Int) -> Void,
+            onToggleDone: @escaping (Int) -> Void
+        ) {
+            openDetailsCallCount += 1
+            lastDetailsModel = model
+            lastFrom = from
+            capturedOnEdit = onEdit
         }
     }
     
@@ -113,7 +141,23 @@ final class ToDoListPresenterTests: XCTestCase {
     func test_didSelectItem_routesToEdit() {
         let (presenter, viewController, _, router) = makeSUT()
         presenter.viewDidLoad()
+
+        // GIVEN: презентер знает про выбранную задачу
+        let now = Date()
+        presenter.didUpdate(items: [
+            ToDoEntity(id: 42, title: "T", details: "D", createdAt: now, isDone: false)
+        ])
+
+        // WHEN: пользователь выбирает задачу
         presenter.didSelectItem(id: 42)
+
+        // THEN: открыт лист деталей
+        XCTAssertEqual(router.openDetailsCallCount, 1)
+        XCTAssertNotNil(router.lastDetailsModel)
+        XCTAssertTrue(router.lastFrom === viewController)
+
+        // AND: по нажатию "Редактировать" открывается редактор
+        router.capturedOnEdit?(42)
         XCTAssertEqual(router.openEditCallCount, 1)
         XCTAssertEqual(router.lastEditId, 42)
         XCTAssertTrue(router.lastFrom === viewController)

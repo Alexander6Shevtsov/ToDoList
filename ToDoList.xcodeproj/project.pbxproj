@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4211CA0D2E6AF78E0089072E /* ToDoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4211CA0C2E6AF78E0089072E /* ToDoCell.swift */; };
 		4211CA112E6B16870089072E /* ToDoDetailsSheetVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4211CA102E6B16870089072E /* ToDoDetailsSheetVC.swift */; };
+		4211CA132E6B3F2E0089072E /* TaskEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4211CA122E6B3F2E0089072E /* TaskEditorViewController.swift */; };
 		429E47D32E6880600095DC33 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47D22E6880600095DC33 /* AppTheme.swift */; };
 		429E47D52E6880F20095DC33 /* ThemeConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47D42E6880F20095DC33 /* ThemeConfigurator.swift */; };
 		429E47E22E698ED30095DC33 /* TestCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47DC2E698ED30095DC33 /* TestCoreData.swift */; };
@@ -46,6 +47,7 @@
 /* Begin PBXFileReference section */
 		4211CA0C2E6AF78E0089072E /* ToDoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoCell.swift; sourceTree = "<group>"; };
 		4211CA102E6B16870089072E /* ToDoDetailsSheetVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoDetailsSheetVC.swift; sourceTree = "<group>"; };
+		4211CA122E6B3F2E0089072E /* TaskEditorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskEditorViewController.swift; sourceTree = "<group>"; };
 		429E47D22E6880600095DC33 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		429E47D42E6880F20095DC33 /* ThemeConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeConfigurator.swift; sourceTree = "<group>"; };
 		429E47DC2E698ED30095DC33 /* TestCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCoreData.swift; sourceTree = "<group>"; };
@@ -192,6 +194,7 @@
 				42E974402E644E2100879F5B /* ToDoListViewController.swift */,
 				4211CA0C2E6AF78E0089072E /* ToDoCell.swift */,
 				4211CA102E6B16870089072E /* ToDoDetailsSheetVC.swift */,
+				4211CA122E6B3F2E0089072E /* TaskEditorViewController.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -412,6 +415,7 @@
 				42E974502E65DB3300879F5B /* CDToDo+CoreData.swift in Sources */,
 				429E47D32E6880600095DC33 /* AppTheme.swift in Sources */,
 				42E974452E658F6D00879F5B /* ToDoListModuleBuilder.swift in Sources */,
+				4211CA132E6B3F2E0089072E /* TaskEditorViewController.swift in Sources */,
 				42E974432E65784A00879F5B /* ToDoListInteractor.swift in Sources */,
 				42E974412E644E2100879F5B /* ToDoListViewController.swift in Sources */,
 				42E974522E66F3D300879F5B /* ToDoRepository.swift in Sources */,
