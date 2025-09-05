@@ -10,11 +10,17 @@ import UIKit
 final class ToDoCell: UITableViewCell {
     static let reuseId = "ToDoCell"
     
-    private let statusView: UIImageView = {
-        let iv = UIImageView()
-        iv.contentMode = .scaleAspectFit
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        return iv
+    // Вызов при тапе по статусу
+    var onToggleTapped: (() -> Void)?
+    
+    // UIButton для обработки тапа
+    private let statusButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.translatesAutoresizingMaskIntoConstraints = false
+        b.tintColor = AppColor.yellow
+        b.backgroundColor = .clear
+        b.accessibilityIdentifier = "todo.statusButton"
+        return b
     }()
     
     private let titleLabel: UILabel = {
@@ -58,20 +64,20 @@ final class ToDoCell: UITableViewCell {
         selectionStyle = .none
         tintColor = AppColor.yellow
         
-        contentView.addSubview(statusView)
+        contentView.addSubview(statusButton)
         contentView.addSubview(titleLabel)
         contentView.addSubview(bodyLabel)
         contentView.addSubview(dateLabel)
         contentView.addSubview(separator)
         
         NSLayoutConstraint.activate([
-            statusView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            statusView.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            statusView.widthAnchor.constraint(equalToConstant: 24),
-            statusView.heightAnchor.constraint(equalToConstant: 24),
+            statusButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            statusButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+            statusButton.widthAnchor.constraint(equalToConstant: 32),
+            statusButton.heightAnchor.constraint(equalToConstant: 32),
             
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            titleLabel.leadingAnchor.constraint(equalTo: statusView.trailingAnchor, constant: 12),
+            titleLabel.leadingAnchor.constraint(equalTo: statusButton.trailingAnchor, constant: 12),
             titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
             bodyLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
@@ -88,6 +94,8 @@ final class ToDoCell: UITableViewCell {
             separator.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             separator.heightAnchor.constraint(equalToConstant: 1)
         ])
+        
+        statusButton.addTarget(self, action: #selector(statusTapped), for: .touchUpInside)
     }
     
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -98,9 +106,10 @@ final class ToDoCell: UITableViewCell {
         titleLabel.text = nil
         bodyLabel.text = nil
         dateLabel.text = nil
+        onToggleTapped = nil
     }
     
-    // [API] Конфигурация из ViewModel
+    // Публичная конфигурация
     func configure(title: String, body: String?, date: String?, isDone: Bool) {
         if isDone {
             let doneTitleAttributes: [NSAttributedString.Key: Any] = [
@@ -115,9 +124,14 @@ final class ToDoCell: UITableViewCell {
         bodyLabel.text = body
         dateLabel.text = date
         
-        statusView.image = isDone
-        ? UIImage(systemName: "checkmark.circle.fill")
-        : UIImage(systemName: "circle")
-        statusView.tintColor = AppColor.yellow
+        // Иконки статуса на кнопке
+        let imageName = isDone ? "checkmark.circle.fill" : "circle"
+        statusButton.setImage(UIImage(systemName: imageName), for: .normal)
+        statusButton.accessibilityLabel = isDone ? "Отметить как невыполнено" : "Отметить как выполнено"
+    }
+    
+    // MARK: - Actions
+    @objc private func statusTapped() {
+        onToggleTapped?()
     }
 }

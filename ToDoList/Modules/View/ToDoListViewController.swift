@@ -3,6 +3,7 @@
 //  ToDoList
 //
 
+
 import UIKit
 
 final class ToDoListViewController: UIViewController {
@@ -17,6 +18,7 @@ final class ToDoListViewController: UIViewController {
     private let refreshControl = UIRefreshControl()
     private let searchController = UISearchController(searchResultsController: nil)
     
+    // Нижняя панель
     private let bottomBar = UIView()
     private let counterLabel = UILabel()
     private let addButtonView = UIButton(type: .system)
@@ -52,7 +54,6 @@ final class ToDoListViewController: UIViewController {
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 88
         tableView.register(ToDoCell.self, forCellReuseIdentifier: ToDoCell.reuseId)
-        
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
@@ -82,15 +83,37 @@ final class ToDoListViewController: UIViewController {
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
         definesPresentationContext = true
-        
-        let searchTextField = searchController.searchBar.searchTextField
-        searchTextField.textColor = AppColor.white
-        searchTextField.tintColor = AppColor.yellow
-        searchTextField.backgroundColor = AppColor.gray
-        searchTextField.attributedPlaceholder = NSAttributedString(
-            string: "Поиск",
-            attributes: [.foregroundColor: UIColor.secondaryLabel]
+
+        let bar = searchController.searchBar
+        let tf  = bar.searchTextField
+
+        tf.backgroundColor = UIColor(white: 1.0, alpha: 0.16)
+        tf.textColor = AppColor.white
+        tf.tintColor = AppColor.yellow
+        tf.layer.cornerRadius = 16
+        tf.layer.masksToBounds = true
+
+        tf.attributedPlaceholder = NSAttributedString(
+            string: "Search",
+            attributes: [
+                .foregroundColor: UIColor(white: 1.0, alpha: 0.78),
+                .font: UIFont.systemFont(ofSize: 17, weight: .regular)
+            ]
         )
+
+        let symCfg = UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold)
+        let searchImg = UIImage(systemName: "magnifyingglass")?
+            .applyingSymbolConfiguration(symCfg)?
+            .withTintColor(UIColor(white: 1.0, alpha: 0.78), renderingMode: .alwaysOriginal)
+        bar.setImage(searchImg, for: .search, state: .normal)
+
+        let micImg = UIImage(systemName: "mic.fill")?
+            .applyingSymbolConfiguration(symCfg)?
+            .withTintColor(UIColor(white: 1.0, alpha: 0.78), renderingMode: .alwaysOriginal)
+        bar.setImage(micImg, for: .bookmark, state: .normal)
+        bar.showsBookmarkButton = true
+        bar.delegate = self
+
         
         output.viewDidLoad()
     }
@@ -119,7 +142,6 @@ final class ToDoListViewController: UIViewController {
             topLine.heightAnchor.constraint(equalToConstant: 1)
         ])
         
-        // Добавляем label
         counterLabel.translatesAutoresizingMaskIntoConstraints = false
         counterLabel.textColor = AppColor.white
         counterLabel.textAlignment = .center
@@ -166,6 +188,12 @@ final class ToDoListViewController: UIViewController {
     @objc private func didTapAdd() {
         output.didTapAdd()
     }
+    
+    @objc private func didTapMic() {
+        let alert = UIAlertController(title: "Voice", message: "Голосовой поиск не реализован", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
 }
 
 // MARK: - View Input
@@ -205,27 +233,19 @@ extension ToDoListViewController: ToDoListViewInput {
 
 // MARK: - Table
 extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(
-        _ tableView: UITableView,
-        numberOfRowsInSection section: Int
-    ) -> Int { items.count }
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { items.count }
     
-    func tableView(
-        _ tableView: UITableView,
-        cellForRowAt indexPath: IndexPath
-    ) -> UITableViewCell {
-        let viewModel = items[indexPath.row]
-        let cell = tableView.dequeueReusableCell(
-            withIdentifier: ToDoCell.reuseId,
-            for: indexPath
-        ) as! ToDoCell
-
-        cell.configure(
-            title: viewModel.title,
-            body: viewModel.subtitle,
-            date: viewModel.meta,
-            isDone: viewModel.isDone
-        )
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let vm = items[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: ToDoCell.reuseId, for: indexPath) as! ToDoCell
+        
+        cell.configure(title: vm.title, body: vm.subtitle, date: vm.meta, isDone: vm.isDone)
+        
+        // Переключение статуса
+        cell.onToggleTapped = { [weak self] in
+            self?.output.didToggleDone(id: vm.id)
+        }
+        
         cell.selectionStyle = .none
         cell.tintColor = AppColor.yellow
         cell.backgroundColor = AppColor.black
@@ -239,22 +259,7 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    // Swipe Done/Undo
-    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let item = items[indexPath.row]
-        let todoId = item.id
-        let actionTitle = item.isDone ? "Undo" : "Done"
-        
-        let toggle = UIContextualAction(style: .normal, title: actionTitle) { [weak self] _, _, finish in
-            self?.output.didToggleDone(id: todoId)
-            finish(true)
-        }
-        let config = UISwipeActionsConfiguration(actions: [toggle])
-        config.performsFirstActionWithFullSwipe = true
-        return config
-    }
-    
-    // Swipe Delete
+    // Свайп на удаление
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let todoId = items[indexPath.row].id
         let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, finish in
@@ -271,5 +276,12 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
 extension ToDoListViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         output.didSearch(query: searchController.searchBar.text ?? "")
+    }
+}
+
+// MARK: - UISearchBarDelegate
+extension ToDoListViewController: UISearchBarDelegate {
+    func searchBarBookmarkButtonClicked(_ searchBar: UISearchBar) {
+        didTapMic()
     }
 }
