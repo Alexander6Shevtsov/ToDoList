@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4211CA0D2E6AF78E0089072E /* ToDoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4211CA0C2E6AF78E0089072E /* ToDoCell.swift */; };
+		4211CA112E6B16870089072E /* ToDoDetailsSheetVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4211CA102E6B16870089072E /* ToDoDetailsSheetVC.swift */; };
 		429E47D32E6880600095DC33 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47D22E6880600095DC33 /* AppTheme.swift */; };
 		429E47D52E6880F20095DC33 /* ThemeConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47D42E6880F20095DC33 /* ThemeConfigurator.swift */; };
 		429E47E22E698ED30095DC33 /* TestCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47DC2E698ED30095DC33 /* TestCoreData.swift */; };
@@ -44,6 +45,7 @@
 
 /* Begin PBXFileReference section */
 		4211CA0C2E6AF78E0089072E /* ToDoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoCell.swift; sourceTree = "<group>"; };
+		4211CA102E6B16870089072E /* ToDoDetailsSheetVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoDetailsSheetVC.swift; sourceTree = "<group>"; };
 		429E47D22E6880600095DC33 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		429E47D42E6880F20095DC33 /* ThemeConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeConfigurator.swift; sourceTree = "<group>"; };
 		429E47DC2E698ED30095DC33 /* TestCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCoreData.swift; sourceTree = "<group>"; };
@@ -189,6 +191,7 @@
 			children = (
 				42E974402E644E2100879F5B /* ToDoListViewController.swift */,
 				4211CA0C2E6AF78E0089072E /* ToDoCell.swift */,
+				4211CA102E6B16870089072E /* ToDoDetailsSheetVC.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -397,6 +400,7 @@
 			files = (
 				42E9743D2E61D9EC00879F5B /* ToDoListPresenter.swift in Sources */,
 				42E974472E659AF600879F5B /* ToDosAPIClient.swift in Sources */,
+				4211CA112E6B16870089072E /* ToDoDetailsSheetVC.swift in Sources */,
 				42E974392E61CD4500879F5B /* RootViewController.swift in Sources */,
 				42E9743F2E63421800879F5B /* ToDoListRouter.swift in Sources */,
 				4211CA0D2E6AF78E0089072E /* ToDoCell.swift in Sources */,

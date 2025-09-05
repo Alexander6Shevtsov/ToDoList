@@ -50,6 +50,13 @@ extension ToDoListInteractorInput {
 protocol ToDoListRouterInput: AnyObject {
     func openCreate(from: UIViewController)
     func openEdit(id: Int, from: UIViewController)
+    func openDetails(
+        model: ToDoDetailsModel,
+        from: UIViewController,
+        onEdit: @escaping (Int) -> Void,
+        onDelete: @escaping (Int) -> Void,
+        onToggleDone: @escaping (Int) -> Void
+    )
 }
 
 // MARK: - Models

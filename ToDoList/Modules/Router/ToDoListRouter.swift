@@ -33,6 +33,23 @@ final class ToDoListRouter: ToDoListRouterInput {
         }
     }
     
+    func openDetails(
+        model: ToDoDetailsModel,
+        from: UIViewController,
+        onEdit: @escaping (Int) -> Void,
+        onDelete: @escaping (Int) -> Void,
+        onToggleDone: @escaping (Int) -> Void
+    ) {
+        let vc = ToDoDetailsSheetViewController(model: model)
+        vc.onEdit = { onEdit(model.id) }
+        vc.onDelete = { onDelete(model.id) }
+        vc.onToggleDone = { onToggleDone(model.id) }
+
+        vc.modalPresentationStyle = .overFullScreen 
+        vc.modalTransitionStyle = .crossDissolve
+        from.present(vc, animated: true)
+    }
+    
     // MARK: - Private
     private func presentForm(
         from: UIViewController,

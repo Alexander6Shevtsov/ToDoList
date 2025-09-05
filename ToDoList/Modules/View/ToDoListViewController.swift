@@ -2,7 +2,8 @@
 //  ToDoListViewController.swift
 //  ToDoList
 //
-
+//  Created by Alexander Shevtsov on 01.09.2025.
+//
 
 import UIKit
 
@@ -83,37 +84,38 @@ final class ToDoListViewController: UIViewController {
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
         definesPresentationContext = true
-
-        let bar = searchController.searchBar
-        let tf  = bar.searchTextField
-
-        tf.backgroundColor = UIColor(white: 1.0, alpha: 0.16)
-        tf.textColor = AppColor.white
-        tf.tintColor = AppColor.yellow
-        tf.layer.cornerRadius = 16
-        tf.layer.masksToBounds = true
-
-        tf.attributedPlaceholder = NSAttributedString(
+        
+        let searchBar = searchController.searchBar
+        let searchTextField  = searchBar.searchTextField
+        
+        searchTextField.backgroundColor = UIColor(white: 1.0, alpha: 0.16)
+        searchTextField.textColor = AppColor.white
+        searchTextField.tintColor = AppColor.yellow
+        searchTextField.layer.cornerRadius = 16
+        searchTextField.layer.masksToBounds = true
+        
+        searchTextField.attributedPlaceholder = NSAttributedString(
             string: "Search",
             attributes: [
                 .foregroundColor: UIColor(white: 1.0, alpha: 0.78),
                 .font: UIFont.systemFont(ofSize: 17, weight: .regular)
             ]
         )
-
-        let symCfg = UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold)
-        let searchImg = UIImage(systemName: "magnifyingglass")?
-            .applyingSymbolConfiguration(symCfg)?
+        
+        // Иконки
+        let symbolConfiguration = UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold)
+        let searchIconImage = UIImage(systemName: "magnifyingglass")?
+            .applyingSymbolConfiguration(symbolConfiguration)?
             .withTintColor(UIColor(white: 1.0, alpha: 0.78), renderingMode: .alwaysOriginal)
-        bar.setImage(searchImg, for: .search, state: .normal)
-
+        searchBar.setImage(searchIconImage, for: .search, state: .normal)
+        
         let micImg = UIImage(systemName: "mic.fill")?
-            .applyingSymbolConfiguration(symCfg)?
+            .applyingSymbolConfiguration(symbolConfiguration)?
             .withTintColor(UIColor(white: 1.0, alpha: 0.78), renderingMode: .alwaysOriginal)
-        bar.setImage(micImg, for: .bookmark, state: .normal)
-        bar.showsBookmarkButton = true
-        bar.delegate = self
-
+        searchBar.setImage(micImg, for: .bookmark, state: .normal)
+        searchBar.showsBookmarkButton = true
+        searchBar.delegate = self
+        
         
         output.viewDidLoad()
     }
@@ -259,7 +261,7 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    // Свайп на удаление
+    // Свайп удаление
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let todoId = items[indexPath.row].id
         let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, finish in
