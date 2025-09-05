@@ -2,24 +2,24 @@
 //  ToDoListViewController.swift
 //  ToDoList
 //
-//  Created by Alexander Shevtsov on 31.08.2025.
-//
 
 import UIKit
 
 final class ToDoListViewController: UIViewController {
     var output: ToDoListViewOutput!
     
-    // State
+    // MARK: - State
     private var items: [ToDoViewModel] = []
     
-    // UI
+    // MARK: - UI
     private let tableView = UITableView(frame: .zero, style: .plain)
-    private let refreshControl = UIRefreshControl()
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
-    private var addButton: UIBarButtonItem?
-    private let cellReuseId = "todoCell"
+    private let refreshControl = UIRefreshControl()
     private let searchController = UISearchController(searchResultsController: nil)
+    
+    private let bottomBar = UIView()
+    private let counterLabel = UILabel()
+    private let addButtonView = UIButton(type: .system)
     
     private let emptyStateLabel: UILabel = {
         let label = UILabel()
@@ -31,30 +31,35 @@ final class ToDoListViewController: UIViewController {
         return label
     }()
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "ToDos"
+        title = "Задачи"
         view.backgroundColor = AppColor.black
+        
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+        
+        setupBottomBar()
         
         // Table
         tableView.backgroundColor = AppColor.black
-        tableView.separatorColor = AppColor.stroke
-        tableView.separatorInsetReference = .fromCellEdges
-        tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        tableView.separatorStyle = .none
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
         tableView.delegate = self
         tableView.keyboardDismissMode = .onDrag
         tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 64
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellReuseId)
+        tableView.estimatedRowHeight = 88
+        tableView.register(ToDoCell.self, forCellReuseIdentifier: ToDoCell.reuseId)
+        
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: bottomBar.topAnchor)
         ])
         
         // Empty state
@@ -74,10 +79,8 @@ final class ToDoListViewController: UIViewController {
         // Search
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchResultsUpdater = self
-        searchController.searchBar.overrideUserInterfaceStyle = .dark
-        searchController.obscuresBackgroundDuringPresentation = false
-        definesPresentationContext = true
         navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
         definesPresentationContext = true
         
         let searchTextField = searchController.searchBar.searchTextField
@@ -85,18 +88,67 @@ final class ToDoListViewController: UIViewController {
         searchTextField.tintColor = AppColor.yellow
         searchTextField.backgroundColor = AppColor.gray
         searchTextField.attributedPlaceholder = NSAttributedString(
-            string: "Search",
+            string: "Поиск",
             attributes: [.foregroundColor: UIColor.secondaryLabel]
         )
         
-        // Add button / loader
-        let addBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAdd))
-        addBarButton.tintColor = AppColor.yellow
-        navigationItem.rightBarButtonItem = addBarButton
-        addButton = addBarButton
-        activityIndicator.hidesWhenStopped = true
-        
         output.viewDidLoad()
+    }
+    
+    // MARK: - Bottom bar
+    private func setupBottomBar() {
+        bottomBar.translatesAutoresizingMaskIntoConstraints = false
+        bottomBar.backgroundColor = AppColor.gray
+        view.addSubview(bottomBar)
+        
+        NSLayoutConstraint.activate([
+            bottomBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            bottomBar.heightAnchor.constraint(equalToConstant: 49)
+        ])
+        
+        let topLine = UIView()
+        topLine.backgroundColor = AppColor.stroke
+        topLine.translatesAutoresizingMaskIntoConstraints = false
+        bottomBar.addSubview(topLine)
+        NSLayoutConstraint.activate([
+            topLine.topAnchor.constraint(equalTo: bottomBar.topAnchor),
+            topLine.leadingAnchor.constraint(equalTo: bottomBar.leadingAnchor),
+            topLine.trailingAnchor.constraint(equalTo: bottomBar.trailingAnchor),
+            topLine.heightAnchor.constraint(equalToConstant: 1)
+        ])
+        
+        // Добавляем label
+        counterLabel.translatesAutoresizingMaskIntoConstraints = false
+        counterLabel.textColor = AppColor.white
+        counterLabel.textAlignment = .center
+        counterLabel.font = .systemFont(ofSize: 17, weight: .regular)
+        bottomBar.addSubview(counterLabel)
+        
+        addButtonView.translatesAutoresizingMaskIntoConstraints = false
+        addButtonView.tintColor = AppColor.yellow
+        addButtonView.setImage(UIImage(systemName: "square.and.pencil"), for: .normal)
+        addButtonView.backgroundColor = .clear
+        addButtonView.addTarget(self, action: #selector(didTapAdd), for: .touchUpInside)
+        bottomBar.addSubview(addButtonView)
+        
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.hidesWhenStopped = true
+        bottomBar.addSubview(activityIndicator)
+        
+        NSLayoutConstraint.activate([
+            counterLabel.centerXAnchor.constraint(equalTo: bottomBar.centerXAnchor),
+            counterLabel.centerYAnchor.constraint(equalTo: bottomBar.centerYAnchor),
+            
+            addButtonView.trailingAnchor.constraint(equalTo: bottomBar.trailingAnchor, constant: -16),
+            addButtonView.centerYAnchor.constraint(equalTo: bottomBar.centerYAnchor),
+            addButtonView.widthAnchor.constraint(equalToConstant: 44),
+            addButtonView.heightAnchor.constraint(equalToConstant: 44),
+            
+            activityIndicator.centerYAnchor.constraint(equalTo: bottomBar.centerYAnchor),
+            activityIndicator.trailingAnchor.constraint(equalTo: addButtonView.leadingAnchor, constant: -12)
+        ])
     }
     
     private func updateEmptyState() {
@@ -116,13 +168,13 @@ final class ToDoListViewController: UIViewController {
     }
 }
 
-// MARK: - ToDoListViewInput
+// MARK: - View Input
 extension ToDoListViewController: ToDoListViewInput {
-    
     func display(items: [ToDoViewModel]) {
         DispatchQueue.main.async {
             self.items = items
             self.tableView.reloadData()
+            self.counterLabel.text = "\(items.count) Задач"
             self.updateEmptyState()
         }
     }
@@ -131,17 +183,15 @@ extension ToDoListViewController: ToDoListViewInput {
         DispatchQueue.main.async {
             if isLoading {
                 self.activityIndicator.startAnimating()
-                self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: self.activityIndicator)
+                self.addButtonView.isEnabled = false
+                self.addButtonView.alpha = 0.5
             } else {
                 self.activityIndicator.stopAnimating()
-                self.navigationItem.rightBarButtonItem = self.addButton
+                self.addButtonView.isEnabled = true
+                self.addButtonView.alpha = 1.0
             }
             self.refreshControl.endRefreshing()
         }
-    }
-    
-    func didChangeLoading(_ isLoading: Bool) {
-        setLoading(isLoading)
     }
     
     func showError(_ message: String) {
@@ -151,38 +201,35 @@ extension ToDoListViewController: ToDoListViewInput {
             self.present(alert, animated: true)
         }
     }
-    
-    func didFail(error: Error) {
-        showError(error.localizedDescription)
-    }
 }
 
-// MARK: - UITableViewDataSource / UITableViewDelegate
+// MARK: - Table
 extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
+    func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int { items.count }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { items.count }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
         let viewModel = items[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellReuseId)
-        ?? UITableViewCell(style: .subtitle, reuseIdentifier: cellReuseId)
-        
-        var content = cell.defaultContentConfiguration()
-        content.textProperties.color = AppColor.white
-        content.textProperties.numberOfLines = 1
-        content.secondaryTextProperties.color = UIColor(white: 1, alpha: 0.7)
-        content.secondaryTextProperties.numberOfLines = 2
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: ToDoCell.reuseId,
+            for: indexPath
+        ) as! ToDoCell
 
-        content.text = viewModel.title
-        content.secondaryText = viewModel.subtitle ?? viewModel.meta
-        cell.contentConfiguration = content
-        
-        cell.accessoryType = (viewModel.subtitle?.isEmpty == false) ? .disclosureIndicator : .none
+        cell.configure(
+            title: viewModel.title,
+            body: viewModel.subtitle,
+            date: viewModel.meta,
+            isDone: viewModel.isDone
+        )
         cell.selectionStyle = .none
         cell.tintColor = AppColor.yellow
-        cell.backgroundColor = .clear
         cell.backgroundColor = AppColor.black
-
+        cell.accessoryType = .disclosureIndicator
         return cell
     }
     
@@ -193,8 +240,7 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     // Swipe Done/Undo
-    func tableView(_ tableView: UITableView,
-                   leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let item = items[indexPath.row]
         let todoId = item.id
         let actionTitle = item.isDone ? "Undo" : "Done"
@@ -209,8 +255,7 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     // Swipe Delete
-    func tableView(_ tableView: UITableView,
-                   trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let todoId = items[indexPath.row].id
         let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, finish in
             self?.output.didDelete(id: todoId)
@@ -222,7 +267,7 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-// MARK: - UISearchResultsUpdating
+// MARK: - Search
 extension ToDoListViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         output.didSearch(query: searchController.searchBar.text ?? "")

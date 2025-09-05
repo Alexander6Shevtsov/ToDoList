@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4211CA0B2E6AE9130089072E /* ToDoDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4211CA0A2E6AE9130089072E /* ToDoDetailsViewController.swift */; };
+		4211CA0D2E6AF78E0089072E /* ToDoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4211CA0C2E6AF78E0089072E /* ToDoCell.swift */; };
 		429E47D32E6880600095DC33 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47D22E6880600095DC33 /* AppTheme.swift */; };
 		429E47D52E6880F20095DC33 /* ThemeConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47D42E6880F20095DC33 /* ThemeConfigurator.swift */; };
 		429E47E22E698ED30095DC33 /* TestCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429E47DC2E698ED30095DC33 /* TestCoreData.swift */; };
@@ -42,6 +44,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4211CA0A2E6AE9130089072E /* ToDoDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoDetailsViewController.swift; sourceTree = "<group>"; };
+		4211CA0C2E6AF78E0089072E /* ToDoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoCell.swift; sourceTree = "<group>"; };
 		429E47D22E6880600095DC33 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		429E47D42E6880F20095DC33 /* ThemeConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeConfigurator.swift; sourceTree = "<group>"; };
 		429E47DC2E698ED30095DC33 /* TestCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCoreData.swift; sourceTree = "<group>"; };
@@ -186,6 +190,8 @@
 			isa = PBXGroup;
 			children = (
 				42E974402E644E2100879F5B /* ToDoListViewController.swift */,
+				4211CA0A2E6AE9130089072E /* ToDoDetailsViewController.swift */,
+				4211CA0C2E6AF78E0089072E /* ToDoCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -396,7 +402,9 @@
 				42E974472E659AF600879F5B /* ToDosAPIClient.swift in Sources */,
 				42E974392E61CD4500879F5B /* RootViewController.swift in Sources */,
 				42E9743F2E63421800879F5B /* ToDoListRouter.swift in Sources */,
+				4211CA0D2E6AF78E0089072E /* ToDoCell.swift in Sources */,
 				42E9743B2E61D2F300879F5B /* ToDoListContracts.swift in Sources */,
+				4211CA0B2E6AE9130089072E /* ToDoDetailsViewController.swift in Sources */,
 				42E974302E61CD2A00879F5B /* AppDelegate.swift in Sources */,
 				42E974312E61CD2A00879F5B /* SceneDelegate.swift in Sources */,
 				42E9744E2E65BF8F00879F5B /* ToDoList.xcdatamodeld in Sources */,

@@ -20,9 +20,9 @@ final class ToDoListPresenter {
     // MARK: - State
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        formatter.locale = Locale.current
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.dateFormat = "dd/MM/yy"
         return formatter
     }()
     
@@ -43,10 +43,13 @@ final class ToDoListPresenter {
     // MARK: - Mapping
     private func map(_ items: [ToDoEntity]) -> [ToDoViewModel] {
         items.map { entity in
-            ToDoViewModel(
+            let trimmedDetails = entity.details?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let body = (trimmedDetails?.isEmpty == false) ? trimmedDetails : nil
+            
+            return ToDoViewModel(
                 id: entity.id,
                 title: entity.title,
-                subtitle: entity.details,
+                subtitle: body,
                 meta: dateFormatter.string(from: entity.createdAt),
                 isDone: entity.isDone
             )
@@ -57,9 +60,15 @@ final class ToDoListPresenter {
 // MARK: - View -> Presenter
 extension ToDoListPresenter: ToDoListViewOutput {
     func viewDidLoad() { interactor.initialLoad() }
-    func didTapAdd() { if let vc = viewController { router.openCreate(from: vc) } }
+    
+    func didTapAdd() {
+        if let vc = viewController { router.openCreate(from: vc) }
+    }
+    
     func didToggleDone(id: Int) { interactor.toggleDone(id: id) }
+    
     func didDelete(id: Int) { interactor.delete(id: id) }
+    
     func didSearch(query: String) {
         searchDebounceWorkItem?.cancel()
         if searchDebounce <= 0 {
@@ -75,10 +84,7 @@ extension ToDoListPresenter: ToDoListViewOutput {
     
     func didSelectItem(id: Int) {
         if let vc = viewController {
-            router.openEdit(
-                id: id,
-                from: vc
-            )
+            router.openEdit(id: id, from: vc)
         }
     }
 }
@@ -98,6 +104,7 @@ extension ToDoListPresenter: ToDoListInteractorOutput {
     }
 }
 
+// MARK: - Inputs from Create/Edit
 extension ToDoListPresenter {
     func handleCreateInput(title: String, details: String?) {
         interactor.create(title: title, details: details)
