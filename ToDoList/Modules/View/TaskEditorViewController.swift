@@ -21,6 +21,17 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     private let mode: TaskEditorMode
     private let dateText: String
     
+    // MARK: State для сравнения
+    private let originalTitle: String
+    private let originalDetails: String
+    
+    // MARK: Бар-кнопка "Сохранить"
+    private lazy var saveButtonItem: UIBarButtonItem = {
+        let item = UIBarButtonItem(title: "Сохранить", style: .done, target: self, action: #selector(saveTapped))
+        item.tintColor = AppColor.yellow
+        return item
+    }()
+    
     private lazy var barBackButton: UIButton = {
         let b = UIButton(type: .system)
         b.setImage(UIImage(systemName: "chevron.left"), for: .normal)
@@ -35,11 +46,14 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     init(mode: TaskEditorMode, title: String?, details: String?, dateText: String) {
         self.mode = mode
         self.dateText = dateText
+        self.originalTitle = title ?? ""
+        self.originalDetails = details ?? ""
         super.init(nibName: nil, bundle: nil)
         titleTextField.text = title
         bodyTextView.text = details
         applyPlaceholdersIfNeeded()
     }
+    
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     // MARK: UI
@@ -89,14 +103,11 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
         navigationItem.leftBarButtonItem  = UIBarButtonItem(
             customView: barBackButton
         )
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: "Сохранить",
-            style: .done,
-            target: self,
-            action: #selector(saveTapped)
-        )
-        navigationItem.rightBarButtonItem?.tintColor = AppColor.yellow
         
+        // наблюдатели за изменениями
+        titleTextField.addTarget(self, action: #selector(textEditingChanged), for: .editingChanged)
+        
+        updateSaveVisibility()
         setupLayout()
         bind()
         addKeyboardObservers()
@@ -119,7 +130,7 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-
+        
         // Контейнер
         content.axis = .vertical
         content.spacing = 16
@@ -131,7 +142,7 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
             content.trailingAnchor.constraint(equalTo: scrollView.frameLayoutGuide.trailingAnchor),
             content.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor)
         ])
-
+        
         // Шапка: Заголовок + Дата вплотную
         let headerStack = UIStackView()
         headerStack.axis = .vertical
@@ -140,11 +151,11 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
         headerStack.addArrangedSubview(titleTextField)
         headerStack.addArrangedSubview(dateLabel)
         content.addArrangedSubview(headerStack)
-
+        
         // Текст задачи
         content.addArrangedSubview(bodyTextView)
         bodyTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 240).isActive = true
-
+        
         // Нижний спейсер
         bottomSpacer.translatesAutoresizingMaskIntoConstraints = false
         bottomSpacer.heightAnchor.constraint(equalToConstant: 0).isActive = true
@@ -171,6 +182,29 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
             nav.popViewController(animated: true)
         } else {
             dismiss(animated: true)
+        }
+    }
+    
+    @objc private func textEditingChanged() { updateSaveVisibility() }
+    func textViewDidChange(_ textView: UITextView) { updateSaveVisibility() }
+    
+    private func normalizedDetails() -> String {
+        (bodyTextView.text == bodyPlaceholder) ? "" : (bodyTextView.text ?? "")
+    }
+    
+    private func updateSaveVisibility() {
+        let curTitle = titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let curDetails = normalizedDetails()
+        
+        switch mode {
+        case .create:
+            navigationItem.rightBarButtonItem = saveButtonItem
+            saveButtonItem.isEnabled = !curTitle.isEmpty
+            
+        case .edit:
+            let changed = (curTitle != originalTitle) || (curDetails != originalDetails)
+            navigationItem.rightBarButtonItem = changed ? saveButtonItem : nil
+            saveButtonItem.isEnabled = !curTitle.isEmpty
         }
     }
     

@@ -8,7 +8,7 @@
 import UIKit
 
 final class ToDoListRouter: ToDoListRouterInput {
-
+    
     private lazy var dateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "ru_RU")
@@ -16,7 +16,7 @@ final class ToDoListRouter: ToDoListRouterInput {
         f.dateFormat = "dd/MM/yy"
         return f
     }()
-
+    
     func openCreate(from: UIViewController, onSave: @escaping (String, String?) -> Void) {
         let vc = TaskEditorViewController(
             mode: .create,
@@ -27,7 +27,7 @@ final class ToDoListRouter: ToDoListRouterInput {
         vc.onSave = onSave
         from.present(UINavigationController(rootViewController: vc), animated: true)
     }
-
+    
     func openEdit(id: Int, title: String, details: String?, date: Date, from: UIViewController, onSave: @escaping (String, String?) -> Void) {
         let vc = TaskEditorViewController(
             mode: .edit(id: id),
@@ -38,7 +38,7 @@ final class ToDoListRouter: ToDoListRouterInput {
         vc.onSave = onSave
         from.present(UINavigationController(rootViewController: vc), animated: true)
     }
-
+    
     func openDetails(
         model: ToDoDetailsModel,
         from: UIViewController,
@@ -50,8 +50,9 @@ final class ToDoListRouter: ToDoListRouterInput {
         vc.onEdit = { onEdit(model.id) }
         vc.onDelete = { onDelete(model.id) }
         vc.onToggleDone = { onToggleDone(model.id) }
-        vc.modalPresentationStyle = .overFullScreen
-        vc.modalTransitionStyle = .crossDissolve
+        vc.modalPresentationStyle = .automatic
+        vc.modalTransitionStyle   = .coverVertical
+        
         from.present(vc, animated: true)
     }
 }

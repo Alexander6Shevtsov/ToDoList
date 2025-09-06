@@ -202,36 +202,36 @@ final class ToDoDetailsSheetViewController: UIViewController {
         row.translatesAutoresizingMaskIntoConstraints = false
         row.heightAnchor.constraint(equalToConstant: 44).isActive = true
         row.addTarget(self, action: action, for: .touchUpInside)
-
+        
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = .systemFont(ofSize: 17)
         titleLabel.textColor = isDestructive ? .systemRed : UIColor(white: 0.05, alpha: 1.0)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-
+        
         let iconView = UIImageView()
         iconView.image = actionIcon(named: imageName, fallback: sfFallback)
         iconView.tintColor = isDestructive ? .systemRed : UIColor(white: 0.05, alpha: 1.0)
         iconView.contentMode = .scaleAspectFit
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.setContentHuggingPriority(.required, for: .horizontal)
-
+        
         row.addSubview(titleLabel)
         row.addSubview(iconView)
-
+        
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 12),
             titleLabel.centerYAnchor.constraint(equalTo: row.centerYAnchor),
-
+            
             iconView.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -12),
             iconView.centerYAnchor.constraint(equalTo: row.centerYAnchor),
             iconView.widthAnchor.constraint(equalToConstant: 22),
             iconView.heightAnchor.constraint(equalToConstant: 22)
         ])
-
+        
         actionsStack.addArrangedSubview(row)
     }
-
+    
     
     private func addSeparator() {
         let separator = UIView()
@@ -250,7 +250,12 @@ final class ToDoDetailsSheetViewController: UIViewController {
     
     // MARK: Actions
     @objc private func dismissSelf() { dismiss(animated: true) }
-    @objc private func editTapped() { onEdit?(); dismissSelf() }
+    @objc private func editTapped() {
+        let run = onEdit
+        dismiss(animated: true) {
+            run?()   // открываем экран задачи ПОСЛЕ закрытия листа
+        }
+    }
     @objc private func shareTapped() {
         var items: [Any] = [model.title]
         if let text = model.details, !text.isEmpty { items.append(text) }
