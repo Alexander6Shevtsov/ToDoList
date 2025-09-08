@@ -63,6 +63,13 @@ final class ToDoListPresenter {
             )
         }
     }
+    
+    private func pluralizeTasks(_ n: Int) -> String {
+        let n10 = n % 10, n100 = n % 100
+        if n10 == 1 && n100 != 11 { return "\(n) Задача" }
+        if (2...4).contains(n10) && !(12...14).contains(n100) { return "\(n) Задачи" }
+        return "\(n) Задач"
+    }
 }
 
 // MARK: - View → Presenter
@@ -138,6 +145,7 @@ extension ToDoListPresenter: ToDoListInteractorOutput {
     func didUpdate(items: [ToDoEntity]) {
         lastItems = items
         view?.display(items: map(items))
+        view?.setCounterText(pluralizeTasks(items.count))
     }
     
     func didFail(error: Error) { view?.showError(error.localizedDescription) }

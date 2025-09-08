@@ -20,7 +20,8 @@ final class ToDoListViewController: UIViewController {
     private let searchController = UISearchController(searchResultsController: nil)
     
     // Нижняя панель
-    private let bottomBar = UIView()
+    private let bottomBarBackground = UIView()        // фон до самого низа
+    private let bottomBar = UIView()                  // контейнер контента панели (по safe area)
     private let counterLabel = UILabel()
     private let addButtonView = UIButton(type: .system)
     
@@ -61,7 +62,7 @@ final class ToDoListViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: bottomBar.topAnchor)
+            tableView.bottomAnchor.constraint(equalTo: bottomBar.topAnchor) // упираем в панель
         ])
         
         // Empty state
@@ -102,7 +103,7 @@ final class ToDoListViewController: UIViewController {
             ]
         )
         
-        // Иконки
+        // Иконки поиска
         let symbolConfiguration = UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold)
         let searchIconImage = UIImage(systemName: "magnifyingglass")?
             .applyingSymbolConfiguration(symbolConfiguration)?
@@ -116,23 +117,38 @@ final class ToDoListViewController: UIViewController {
         searchBar.showsBookmarkButton = true
         searchBar.delegate = self
         
-        
         output.viewDidLoad()
     }
     
     // MARK: - Bottom bar
     private func setupBottomBar() {
+        // Фон, тянется до самого низа экрана
+        bottomBarBackground.translatesAutoresizingMaskIntoConstraints = false
+        bottomBarBackground.backgroundColor = AppColor.gray
+        view.addSubview(bottomBarBackground)
+        
+        // Контент панели по safe area
         bottomBar.translatesAutoresizingMaskIntoConstraints = false
         bottomBar.backgroundColor = AppColor.gray
         view.addSubview(bottomBar)
         
         NSLayoutConstraint.activate([
+            // фон
+            bottomBarBackground.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomBarBackground.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomBarBackground.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            // панель
             bottomBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bottomBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            bottomBar.heightAnchor.constraint(equalToConstant: 49)
+            bottomBar.heightAnchor.constraint(equalToConstant: 49),
+            
+            // фон начинается с верха панели
+            bottomBarBackground.topAnchor.constraint(equalTo: bottomBar.topAnchor)
         ])
         
+        // Верхняя линия
         let topLine = UIView()
         topLine.backgroundColor = AppColor.stroke
         topLine.translatesAutoresizingMaskIntoConstraints = false
@@ -144,12 +160,14 @@ final class ToDoListViewController: UIViewController {
             topLine.heightAnchor.constraint(equalToConstant: 1)
         ])
         
+        // Счётчик
         counterLabel.translatesAutoresizingMaskIntoConstraints = false
         counterLabel.textColor = AppColor.white
         counterLabel.textAlignment = .center
         counterLabel.font = .systemFont(ofSize: 17, weight: .regular)
         bottomBar.addSubview(counterLabel)
         
+        // Кнопка добавления — стандартная иконка
         addButtonView.translatesAutoresizingMaskIntoConstraints = false
         addButtonView.tintColor = AppColor.yellow
         addButtonView.setImage(UIImage(systemName: "square.and.pencil"), for: .normal)
@@ -157,6 +175,7 @@ final class ToDoListViewController: UIViewController {
         addButtonView.addTarget(self, action: #selector(didTapAdd), for: .touchUpInside)
         bottomBar.addSubview(addButtonView)
         
+        // Индикатор
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         activityIndicator.hidesWhenStopped = true
         bottomBar.addSubview(activityIndicator)
@@ -204,7 +223,6 @@ extension ToDoListViewController: ToDoListViewInput {
         DispatchQueue.main.async {
             self.items = items
             self.tableView.reloadData()
-            self.counterLabel.text = "\(items.count) Задач"
             self.updateEmptyState()
         }
     }
@@ -231,6 +249,8 @@ extension ToDoListViewController: ToDoListViewInput {
             self.present(alert, animated: true)
         }
     }
+    
+    func setCounterText(_ text: String) { counterLabel.text = text }
 }
 
 // MARK: - Table
@@ -259,18 +279,6 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
         let todoId = items[indexPath.row].id
         output.didSelectItem(id: todoId)
         tableView.deselectRow(at: indexPath, animated: true)
-    }
-    
-    // Свайп удаление
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let todoId = items[indexPath.row].id
-        let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, finish in
-            self?.output.didDelete(id: todoId)
-            finish(true)
-        }
-        let config = UISwipeActionsConfiguration(actions: [delete])
-        config.performsFirstActionWithFullSwipe = true
-        return config
     }
 }
 

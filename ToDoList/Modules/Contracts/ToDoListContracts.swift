@@ -12,6 +12,7 @@ protocol ToDoListViewInput: AnyObject {
     func display(items: [ToDoViewModel])
     func setLoading(_ isLoading: Bool)
     func showError(_ message: String)
+    func setCounterText(_ text: String)
 }
 
 protocol ToDoListViewOutput: AnyObject {

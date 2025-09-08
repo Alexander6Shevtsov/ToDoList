@@ -90,13 +90,12 @@ final class ToDoDetailsSheetViewController: UIViewController {
         let cardHeight: CGFloat = 106
         let actionsWidth: CGFloat = 254
         let cornerRadius: CGFloat = 12
-        let verticalGap: CGFloat = 16
         let bottomInset: CGFloat = 150
         
         // Корневой стек
         rootStack.axis = .vertical
         rootStack.alignment = .center
-        rootStack.spacing = verticalGap
+        rootStack.spacing = 16
         rootStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(rootStack)
         NSLayoutConstraint.activate([
@@ -231,7 +230,6 @@ final class ToDoDetailsSheetViewController: UIViewController {
         
         actionsStack.addArrangedSubview(row)
     }
-    
     
     private func addSeparator() {
         let separator = UIView()
