@@ -17,22 +17,43 @@ final class ToDosAPIClient {
     }
     
     func fetchAll(completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
-        var components = URLComponents(url: baseURL.appendingPathComponent("/todos"), resolvingAgainstBaseURL: true)!
+        var components = URLComponents(
+            url: baseURL.appendingPathComponent("/todos"),
+            resolvingAgainstBaseURL: true
+        )!
         components.queryItems = [URLQueryItem(name: "limit", value: "0")]
-        guard let url = components.url else { return completion(.failure(APIError.invalidURL)) }
+        guard let url = components.url else {
+            return completion(.failure(APIError.invalidURL))
+        }
         
-        urlSession.dataTask(with: url) { data, response, error in
+        urlSession.dataTask(with: url) {
+            data,
+            response,
+            error in
             if let error = error { return completion(.failure(error)) }
-            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-                return completion(.failure(APIError.httpStatus((response as? HTTPURLResponse)?.statusCode ?? -1)))
+            guard let http = response as? HTTPURLResponse,
+                  (
+                    200..<300
+                  ).contains(http.statusCode) else {
+                return completion(
+                    .failure(
+                        APIError.httpStatus((response as? HTTPURLResponse)?.statusCode ?? -1)
+                    )
+                )
             }
             guard let data = data else { return completion(.failure(APIError.emptyData)) }
             
             do {
-                let dto = try JSONDecoder().decode(ToDoResponseDTO.self, from: data)
+                let decodedResponse = try JSONDecoder().decode(ToDoResponseDTO.self, from: data)
                 let now = Date()
-                let entities = dto.todos.map {
-                    ToDoEntity(id: $0.id, title: $0.todo, details: nil, createdAt: now, isDone: $0.completed)
+                let entities = decodedResponse.todos.map {
+                    ToDoEntity(
+                        id: $0.id,
+                        title: $0.todo,
+                        details: nil,
+                        createdAt: now,
+                        isDone: $0.completed
+                    )
                 }
                 completion(.success(entities))
             } catch {

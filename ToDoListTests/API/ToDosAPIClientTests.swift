@@ -45,8 +45,6 @@ final class ToDosAPIClientTests: XCTestCase {
         override func stopLoading() {}
     }
     
-    
-    
     private let todosURL = URL(string: "https://dummyjson.com/todos?limit=0")!
     
     private func makeClient() -> ToDosAPIClient {

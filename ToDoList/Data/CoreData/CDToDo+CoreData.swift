@@ -30,7 +30,6 @@ extension CDToDo {
 }
 
 // MARK: - Мапинг Core Data
-
 extension CDToDo {
     func toDomain() -> ToDoEntity {
         ToDoEntity(

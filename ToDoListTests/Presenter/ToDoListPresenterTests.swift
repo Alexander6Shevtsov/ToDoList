@@ -11,19 +11,33 @@ import XCTest
 final class ToDoListPresenterTests: XCTestCase {
     
     // MARK: - Mocks
+    // Экран списка — реализует ToDoListViewInput и сохраняет последние значения
     private final class MockViewController: UIViewController, ToDoListViewInput {
-        var displayed: [ToDoViewModel] = []
-        var isLoading: Bool?
-        var lastError: String?
+        
+        // Что читают тесты
         var displayCallCount = 0
         var lastDisplayedItems: [ToDoViewModel]?
+        var isLoading = false
+        var lastError: String?
+        var lastCounterText: String?
         
+        // MARK: - ToDoListViewInput
         func display(items: [ToDoViewModel]) {
             displayCallCount += 1
             lastDisplayedItems = items
         }
-        func setLoading(_ isLoading: Bool) { self.isLoading = isLoading }
-        func showError(_ message: String) { lastError = message }
+        
+        func setLoading(_ isLoading: Bool) {
+            self.isLoading = isLoading
+        }
+        
+        func showError(_ message: String) {
+            lastError = message
+        }
+        
+        func setCounterText(_ text: String) {
+            lastCounterText = text
+        }
     }
     
     private final class MockInteractor: ToDoListInteractorInput {
@@ -46,15 +60,16 @@ final class ToDoListPresenterTests: XCTestCase {
         }
     }
     
-    final class MockRouter: ToDoListRouterInput {
-        // счётчики + последние параметры
+    private final class MockRouter: ToDoListRouterInput {
         var openCreateCallCount = 0
         var openEditCallCount = 0
         var openDetailsCallCount = 0
+        
         var lastFrom: UIViewController?
         var lastEditId: Int?
         var lastDetailsModel: ToDoDetailsModel?
-        // захват колбэка "Редактировать" из листа
+        
+        // захваченное замыкание
         var capturedOnEdit: ((Int) -> Void)?
         
         func openCreate(
@@ -94,10 +109,10 @@ final class ToDoListPresenterTests: XCTestCase {
     
     // MARK: - SUT
     private func makeSUT() -> (
-        ToDoListPresenter,
-        MockViewController,
-        MockInteractor,
-        MockRouter
+        presenter: ToDoListPresenter,
+        view: MockViewController,
+        interactor: MockInteractor,
+        router: MockRouter
     ) {
         let viewController = MockViewController()
         let interactor = MockInteractor()
@@ -119,48 +134,45 @@ final class ToDoListPresenterTests: XCTestCase {
     }
     
     func test_didUpdate_callsViewDisplay() {
-        let (presenter, viewController, _, _) = makeSUT()
-        let currentDate = Date()
+        let (presenter, view, _, _) = makeSUT()
+        let now = Date()
         let items = [
-            ToDoEntity(id: 1, title: "A", details: "d", createdAt: currentDate, isDone: false),
-            ToDoEntity(id: 2, title: "B", details: nil, createdAt: currentDate, isDone: true)
+            ToDoEntity(id: 1, title: "A", details: "d", createdAt: now, isDone: false),
+            ToDoEntity(id: 2, title: "B", details: nil, createdAt: now, isDone: true)
         ]
         presenter.didUpdate(items: items)
-        XCTAssertEqual(viewController.displayCallCount, 1)
-        XCTAssertEqual(viewController.lastDisplayedItems?.count, 2)
+        XCTAssertEqual(view.displayCallCount, 1)
+        XCTAssertEqual(view.lastDisplayedItems?.count, 2)
     }
     
     func test_didTapAdd_routesToCreate() {
-        let (presenter, viewController, _, router) = makeSUT()
+        let (presenter, view, _, router) = makeSUT()
         presenter.viewDidLoad()
         presenter.didTapAdd()
         XCTAssertEqual(router.openCreateCallCount, 1)
-        XCTAssertTrue(router.lastFrom === viewController)
+        XCTAssertTrue(router.lastFrom === view)
     }
     
-    func test_didSelectItem_routesToEdit() {
-        let (presenter, viewController, _, router) = makeSUT()
+    func test_didSelectItem_routesToEditViaDetailsSheet() {
+        let (presenter, view, _, router) = makeSUT()
         presenter.viewDidLoad()
         
-        // GIVEN: презентер знает про выбранную задачу
         let now = Date()
         presenter.didUpdate(items: [
             ToDoEntity(id: 42, title: "T", details: "D", createdAt: now, isDone: false)
         ])
         
-        // WHEN: пользователь выбирает задачу
         presenter.didSelectItem(id: 42)
         
-        // THEN: открыт лист деталей
         XCTAssertEqual(router.openDetailsCallCount, 1)
         XCTAssertNotNil(router.lastDetailsModel)
-        XCTAssertTrue(router.lastFrom === viewController)
+        XCTAssertTrue(router.lastFrom === view)
         
-        // AND: по нажатию "Редактировать" открывается редактор
         router.capturedOnEdit?(42)
+        
         XCTAssertEqual(router.openEditCallCount, 1)
         XCTAssertEqual(router.lastEditId, 42)
-        XCTAssertTrue(router.lastFrom === viewController)
+        XCTAssertTrue(router.lastFrom === view)
     }
     
     func test_toggleDeleteSearch_forwardToInteractor() {
@@ -174,13 +186,13 @@ final class ToDoListPresenterTests: XCTestCase {
     }
     
     func test_loadingAndError_forwardToView() {
-        let (presenter, viewController, _, _) = makeSUT()
+        let (presenter, view, _, _) = makeSUT()
         presenter.didChangeLoading(true)
-        XCTAssertEqual(viewController.isLoading, true)
+        XCTAssertEqual(view.isLoading, true)
         presenter.didChangeLoading(false)
-        XCTAssertEqual(viewController.isLoading, false)
+        XCTAssertEqual(view.isLoading, false)
         
         presenter.didFail(error: NSError(domain: "x", code: 1))
-        XCTAssertNotNil(viewController.lastError)
+        XCTAssertNotNil(view.lastError)
     }
 }

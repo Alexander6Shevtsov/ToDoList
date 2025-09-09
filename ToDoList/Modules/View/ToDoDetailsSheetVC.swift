@@ -15,20 +15,20 @@ final class ToDoDetailsSheetViewController: UIViewController {
     // MARK: Callbacks
     var onEdit: (() -> Void)?
     var onDelete: (() -> Void)?
-    var onToggleDone: (() -> Void)? // оставлен для совместимости
+    var onToggleDone: (() -> Void)?
     
     // MARK: UI
     private let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
     private let dimView = UIView()
     private let rootStack = UIStackView()
     
-    // Карточка задачи (серый фон по макету)
+    // Карточка задачи
     private let cardView = UIView()
     private let titleLabel = UILabel()
     private let bodyLabel = UILabel()
     private let dateLabel = UILabel()
     
-    // Единый блок действий (светлый фон по макету)
+    // Блок действий
     private let actionsContainer = UIView()
     private let actionsStack = UIStackView()
     
@@ -49,11 +49,11 @@ final class ToDoDetailsSheetViewController: UIViewController {
     }
     
     private func actionIcon(named assetName: String, fallback systemName: String) -> UIImage {
-        if let img = UIImage(named: assetName) {
-            return img.withRenderingMode(.alwaysTemplate) // используем tintColor
+        if let image = UIImage(named: assetName) {
+            return image.withRenderingMode(.alwaysTemplate) // используем tintColor
         }
-        let cfg = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
-        return UIImage(systemName: systemName, withConfiguration: cfg)!.withRenderingMode(.alwaysTemplate)
+        let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
+        return UIImage(systemName: systemName, withConfiguration: config)!.withRenderingMode(.alwaysTemplate)
     }
     
     // MARK: Blur
@@ -68,7 +68,7 @@ final class ToDoDetailsSheetViewController: UIViewController {
             blurView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        // Доп. затемнение для “чёрного” вида
+        // Доп. затемнение
         dimView.backgroundColor = UIColor.black.withAlphaComponent(0.45)
         dimView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(dimView)
@@ -84,7 +84,7 @@ final class ToDoDetailsSheetViewController: UIViewController {
         dimView.addGestureRecognizer(tap)
     }
     
-    // MARK: Layout (размеры из макета)
+    // MARK: Layout
     private func setupLayout() {
         let cardWidth: CGFloat = 320
         let cardHeight: CGFloat = 106
@@ -98,12 +98,17 @@ final class ToDoDetailsSheetViewController: UIViewController {
         rootStack.spacing = 16
         rootStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(rootStack)
-        NSLayoutConstraint.activate([
-            rootStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            rootStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -bottomInset)
-        ])
+        NSLayoutConstraint.activate(
+            [
+                rootStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                rootStack.bottomAnchor.constraint(
+                    equalTo: view.safeAreaLayoutGuide.bottomAnchor,
+                    constant: -bottomInset
+                )
+            ]
+        )
         
-        // Карточка задачи — СЕРЫЙ фон (AppColor.gray)
+        // Карточка задачи
         cardView.translatesAutoresizingMaskIntoConstraints = false
         cardView.backgroundColor = AppColor.gray
         cardView.layer.cornerRadius = cornerRadius
@@ -126,7 +131,6 @@ final class ToDoDetailsSheetViewController: UIViewController {
             cardStack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12)
         ])
         
-        // Тексты на тёмном фоне
         titleLabel.numberOfLines = 1
         titleLabel.font = .systemFont(ofSize: 20, weight: .semibold)
         titleLabel.textColor = AppColor.white
@@ -143,7 +147,7 @@ final class ToDoDetailsSheetViewController: UIViewController {
         cardStack.addArrangedSubview(bodyLabel)
         cardStack.addArrangedSubview(dateLabel)
         
-        // Единый блок действий — СВЕТЛЫЙ фон
+        // Блок действий
         actionsContainer.translatesAutoresizingMaskIntoConstraints = false
         actionsContainer.backgroundColor = UIColor(white: 0.96, alpha: 1.0)
         actionsContainer.layer.cornerRadius = cornerRadius
@@ -163,7 +167,6 @@ final class ToDoDetailsSheetViewController: UIViewController {
             actionsStack.bottomAnchor.constraint(equalTo: actionsContainer.bottomAnchor)
         ])
         
-        // Строки действий: текст слева, иконка справа
         addActionRow(
             title: "Редактировать",
             imageName: "action_edit",
@@ -251,7 +254,7 @@ final class ToDoDetailsSheetViewController: UIViewController {
     @objc private func editTapped() {
         let run = onEdit
         dismiss(animated: true) {
-            run?()   // открываем экран задачи ПОСЛЕ закрытия листа
+            run?()
         }
     }
     @objc private func shareTapped() {

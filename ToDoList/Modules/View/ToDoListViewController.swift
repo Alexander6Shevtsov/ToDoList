@@ -18,10 +18,8 @@ final class ToDoListViewController: UIViewController {
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
     private let refreshControl = UIRefreshControl()
     private let searchController = UISearchController(searchResultsController: nil)
-    
-    // Нижняя панель
-    private let bottomBarBackground = UIView()        // фон до самого низа
-    private let bottomBar = UIView()                  // контейнер контента панели (по safe area)
+    private let bottomBarBackground = UIView()
+    private let bottomBar = UIView()
     private let counterLabel = UILabel()
     private let addButtonView = UIButton(type: .system)
     
@@ -62,7 +60,7 @@ final class ToDoListViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: bottomBar.topAnchor) // упираем в панель
+            tableView.bottomAnchor.constraint(equalTo: bottomBar.topAnchor)
         ])
         
         // Empty state
@@ -104,15 +102,29 @@ final class ToDoListViewController: UIViewController {
         )
         
         // Иконки поиска
-        let symbolConfiguration = UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold)
-        let searchIconImage = UIImage(systemName: "magnifyingglass")?
+        let symbolConfiguration = UIImage.SymbolConfiguration(
+            pointSize: 17,
+            weight: .semibold
+        )
+        let searchIconImage = UIImage(
+            systemName: "magnifyingglass"
+        )?
             .applyingSymbolConfiguration(symbolConfiguration)?
-            .withTintColor(UIColor(white: 1.0, alpha: 0.78), renderingMode: .alwaysOriginal)
+            .withTintColor(
+                UIColor(
+                    white: 1.0,
+                    alpha: 0.78
+                ),
+                renderingMode: .alwaysOriginal
+            )
         searchBar.setImage(searchIconImage, for: .search, state: .normal)
         
         let micImg = UIImage(systemName: "mic.fill")?
             .applyingSymbolConfiguration(symbolConfiguration)?
-            .withTintColor(UIColor(white: 1.0, alpha: 0.78), renderingMode: .alwaysOriginal)
+            .withTintColor(
+                UIColor(white: 1.0, alpha: 0.78),
+                renderingMode: .alwaysOriginal
+            )
         searchBar.setImage(micImg, for: .bookmark, state: .normal)
         searchBar.showsBookmarkButton = true
         searchBar.delegate = self
@@ -122,12 +134,10 @@ final class ToDoListViewController: UIViewController {
     
     // MARK: - Bottom bar
     private func setupBottomBar() {
-        // Фон, тянется до самого низа экрана
         bottomBarBackground.translatesAutoresizingMaskIntoConstraints = false
         bottomBarBackground.backgroundColor = AppColor.gray
         view.addSubview(bottomBarBackground)
         
-        // Контент панели по safe area
         bottomBar.translatesAutoresizingMaskIntoConstraints = false
         bottomBar.backgroundColor = AppColor.gray
         view.addSubview(bottomBar)
@@ -143,8 +153,6 @@ final class ToDoListViewController: UIViewController {
             bottomBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bottomBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             bottomBar.heightAnchor.constraint(equalToConstant: 49),
-            
-            // фон начинается с верха панели
             bottomBarBackground.topAnchor.constraint(equalTo: bottomBar.topAnchor)
         ])
         
@@ -167,7 +175,7 @@ final class ToDoListViewController: UIViewController {
         counterLabel.font = .systemFont(ofSize: 17, weight: .regular)
         bottomBar.addSubview(counterLabel)
         
-        // Кнопка добавления — стандартная иконка
+        // Кнопка добавления
         addButtonView.translatesAutoresizingMaskIntoConstraints = false
         addButtonView.tintColor = AppColor.yellow
         addButtonView.setImage(UIImage(systemName: "square.and.pencil"), for: .normal)
@@ -211,7 +219,11 @@ final class ToDoListViewController: UIViewController {
     }
     
     @objc private func didTapMic() {
-        let alert = UIAlertController(title: "Voice", message: "Голосовой поиск не реализован", preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: "Voice",
+            message: "Голосовой поиск не реализован",
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }

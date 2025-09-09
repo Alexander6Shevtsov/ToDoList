@@ -14,13 +14,13 @@ enum ThemeConfigurator {
         nav.backgroundColor = AppColor.black
         nav.titleTextAttributes = [.foregroundColor: AppColor.white]
         nav.largeTitleTextAttributes = [.foregroundColor: AppColor.white]
-
+        
         let bar = UINavigationBar.appearance()
         bar.standardAppearance = nav
         bar.scrollEdgeAppearance = nav
         bar.compactAppearance = nav
         bar.tintColor = AppColor.yellow
-
+        
         // Таблица и ячейки
         UITableView.appearance().backgroundColor = AppColor.black
         UITableViewCell.appearance().backgroundColor = AppColor.black

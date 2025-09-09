@@ -109,7 +109,7 @@ final class ToDoCell: UITableViewCell {
         onToggleTapped = nil
     }
     
-    // Публичная конфигурация
+    // конфигурация
     func configure(title: String, body: String?, date: String?, isDone: Bool) {
         if isDone {
             let doneTitleAttributes: [NSAttributedString.Key: Any] = [
@@ -127,7 +127,7 @@ final class ToDoCell: UITableViewCell {
         // Иконки статуса на кнопке
         let imageName = isDone ? "checkmark.circle.fill" : "circle"
         statusButton.setImage(UIImage(systemName: imageName), for: .normal)
-        statusButton.accessibilityLabel = isDone ? "Отметить как невыполнено" : "Отметить как выполнено"
+        statusButton.accessibilityLabel = isDone ? "Отметить как не выполнено" : "Отметить как выполнено"
     }
     
     // MARK: - Actions

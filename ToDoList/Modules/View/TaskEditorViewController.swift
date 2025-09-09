@@ -17,17 +17,20 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     // MARK: Public
     var onSave: ((String, String?) -> Void)?
     
-    // MARK: Init
     private let mode: TaskEditorMode
     private let dateText: String
     
-    // MARK: State для сравнения
     private let originalTitle: String
     private let originalDetails: String
     
-    // MARK: Бар-кнопка "Сохранить"
+    // MARK: Button "Сохранить"
     private lazy var saveButtonItem: UIBarButtonItem = {
-        let item = UIBarButtonItem(title: "Сохранить", style: .done, target: self, action: #selector(saveTapped))
+        let item = UIBarButtonItem(
+            title: "Сохранить",
+            style: .done,
+            target: self,
+            action: #selector(saveTapped)
+        )
         item.tintColor = AppColor.yellow
         return item
     }()
@@ -61,36 +64,36 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     private let content = UIStackView()
     
     private let titleTextField: UITextField = {
-        let f = UITextField()
-        f.font = .systemFont(ofSize: 34, weight: .bold)
-        f.textColor = AppColor.white
-        f.tintColor = AppColor.yellow
-        f.placeholder = "Название"
-        f.translatesAutoresizingMaskIntoConstraints = false
-        return f
+        let title = UITextField()
+        title.font = .systemFont(ofSize: 34, weight: .bold)
+        title.textColor = AppColor.white
+        title.tintColor = AppColor.yellow
+        title.placeholder = "Название"
+        title.translatesAutoresizingMaskIntoConstraints = false
+        return title
     }()
     
     private let dateLabel: UILabel = {
-        let l = UILabel()
-        l.font = .systemFont(ofSize: 15, weight: .regular)
-        l.textColor = UIColor(white: 1, alpha: 0.6)
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 15, weight: .regular)
+        label.textColor = UIColor(white: 1, alpha: 0.6)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
     private let bodyTextView: UITextView = {
-        let v = UITextView()
-        v.backgroundColor = .clear
-        v.textColor = AppColor.white
-        v.tintColor = AppColor.yellow
-        v.font = .systemFont(ofSize: 20, weight: .regular)
-        v.textContainerInset = .zero
-        v.textContainer.lineFragmentPadding = 0
-        v.translatesAutoresizingMaskIntoConstraints = false
-        return v
+        let textView = UITextView()
+        textView.backgroundColor = .clear
+        textView.textColor = AppColor.white
+        textView.tintColor = AppColor.yellow
+        textView.font = .systemFont(ofSize: 20, weight: .regular)
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        return textView
     }()
     
-    private let bottomSpacer = UIView() // чтобы клавиатура не перекрывала
+    private let bottomSpacer = UIView()
     
     // MARK: Lifecycle
     override func viewDidLoad() {
@@ -104,8 +107,11 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
             customView: barBackButton
         )
         
-        // наблюдатели за изменениями
-        titleTextField.addTarget(self, action: #selector(textEditingChanged), for: .editingChanged)
+        titleTextField.addTarget(
+            self,
+            action: #selector(textEditingChanged),
+            for: .editingChanged
+        )
         
         updateSaveVisibility()
         setupLayout()
@@ -143,10 +149,10 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
             content.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor)
         ])
         
-        // Шапка: Заголовок + Дата вплотную
+        // Шапка: Заголовок + Дата
         let headerStack = UIStackView()
         headerStack.axis = .vertical
-        headerStack.spacing = 4 // ближе к заголовку, как в макете
+        headerStack.spacing = 4
         headerStack.translatesAutoresizingMaskIntoConstraints = false
         headerStack.addArrangedSubview(titleTextField)
         headerStack.addArrangedSubview(dateLabel)
@@ -200,7 +206,6 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
         case .create:
             navigationItem.rightBarButtonItem = saveButtonItem
             saveButtonItem.isEnabled = !curTitle.isEmpty
-            
         case .edit:
             let changed = (curTitle != originalTitle) || (curDetails != originalDetails)
             navigationItem.rightBarButtonItem = changed ? saveButtonItem : nil
@@ -216,12 +221,14 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
             bodyTextView.textColor = UIColor(white: 1, alpha: 0.35)
         }
     }
+    
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.text == bodyPlaceholder {
             textView.text = nil
             textView.textColor = AppColor.white
         }
     }
+    
     func textViewDidEndEditing(_ textView: UITextView) {
         if (textView.text ?? "").isEmpty {
             applyPlaceholdersIfNeeded()
@@ -230,8 +237,14 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     
     // MARK: Keyboard
     private func addKeyboardObservers() {
-        NotificationCenter.default.addObserver(self, selector: #selector(kb), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(kb),
+            name: UIResponder.keyboardWillChangeFrameNotification,
+            object: nil
+        )
     }
+    
     @objc private func kb(_ n: Notification) {
         guard
             let userInfo = n.userInfo,

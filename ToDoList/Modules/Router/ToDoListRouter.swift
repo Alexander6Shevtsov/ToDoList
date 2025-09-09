@@ -10,33 +10,43 @@ import UIKit
 final class ToDoListRouter: ToDoListRouterInput {
     
     private lazy var dateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "ru_RU")
-        f.calendar = .init(identifier: .gregorian)
-        f.dateFormat = "dd/MM/yy"
-        return f
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.calendar = .init(identifier: .gregorian)
+        formatter.dateFormat = "dd/MM/yy"
+        return formatter
     }()
     
-    func openCreate(from: UIViewController, onSave: @escaping (String, String?) -> Void) {
-        let vc = TaskEditorViewController(
+    func openCreate(
+        from: UIViewController,
+        onSave: @escaping (String, String?) -> Void
+    ) {
+        let editor = TaskEditorViewController(
             mode: .create,
             title: nil,
             details: nil,
             dateText: dateFormatter.string(from: Date())
         )
-        vc.onSave = onSave
-        from.present(UINavigationController(rootViewController: vc), animated: true)
+        editor.onSave = onSave
+        from.present(UINavigationController(rootViewController: editor), animated: true)
     }
     
-    func openEdit(id: Int, title: String, details: String?, date: Date, from: UIViewController, onSave: @escaping (String, String?) -> Void) {
-        let vc = TaskEditorViewController(
+    func openEdit(
+        id: Int,
+        title: String,
+        details: String?,
+        date: Date,
+        from: UIViewController,
+        onSave: @escaping (String, String?) -> Void
+    ) {
+        let editor = TaskEditorViewController(
             mode: .edit(id: id),
             title: title,
             details: details,
             dateText: dateFormatter.string(from: date)
         )
-        vc.onSave = onSave
-        from.present(UINavigationController(rootViewController: vc), animated: true)
+        editor.onSave = onSave
+        from.present(UINavigationController(rootViewController: editor), animated: true)
     }
     
     func openDetails(
@@ -46,13 +56,13 @@ final class ToDoListRouter: ToDoListRouterInput {
         onDelete: @escaping (Int) -> Void,
         onToggleDone: @escaping (Int) -> Void
     ) {
-        let vc = ToDoDetailsSheetViewController(model: model)
-        vc.onEdit = { onEdit(model.id) }
-        vc.onDelete = { onDelete(model.id) }
-        vc.onToggleDone = { onToggleDone(model.id) }
-        vc.modalPresentationStyle = .automatic
-        vc.modalTransitionStyle   = .coverVertical
+        let detailsSheet = ToDoDetailsSheetViewController(model: model)
+        detailsSheet.onEdit = { onEdit(model.id) }
+        detailsSheet.onDelete = { onDelete(model.id) }
+        detailsSheet.onToggleDone = { onToggleDone(model.id) }
+        detailsSheet.modalPresentationStyle = .automatic
+        detailsSheet.modalTransitionStyle   = .coverVertical
         
-        from.present(vc, animated: true)
+        from.present(detailsSheet, animated: true)
     }
 }
