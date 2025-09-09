@@ -8,37 +8,47 @@
 import UIKit
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    
+    // MARK: - Public Properties
     var window: UIWindow?
+    
+    // MARK: - Overrides
+    // Точка входа при создании сцены: конфигурируем тему, окно и корневой модуль
+    override func responds(to aSelector: Selector!) -> Bool {
+        super.responds(to: aSelector)
+    }
     
     func scene(
         _ scene: UIScene,
         willConnectTo session: UISceneSession,
         options connectionOptions: UIScene.ConnectionOptions
     ) {
-        guard let windowScene = scene as? UIWindowScene else { return }
-        
         ThemeConfigurator.apply()
         
-        let window = UIWindow(windowScene: windowScene)
-        window.tintColor = AppColor.yellow
+        guard let windowScene = scene as? UIWindowScene else { return }
         
-        let listVC = ToDoListModuleBuilder.build()
-        let rootNavigationController = UINavigationController(rootViewController: listVC)
-        
-        window.rootViewController = rootNavigationController
-        window.makeKeyAndVisible()
-        self.window = window
+        // Выделил установку корневого контроллера в отдельный метод
+        setRootController(in: windowScene)
     }
     
-    func sceneDidDisconnect(_ scene: UIScene) {}
-    
-    func sceneDidBecomeActive(_ scene: UIScene) {}
-    
-    func sceneWillResignActive(_ scene: UIScene) {}
-    
-    func sceneWillEnterForeground(_ scene: UIScene) {}
-    
+    // Сохранение контекста при уходе в фон
     func sceneDidEnterBackground(_ scene: UIScene) {
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
+    }
+    
+    // MARK: - Private Methods
+    // Создание окна и установка корневого контроллера навигации
+    private func setRootController(in windowScene: UIWindowScene) {
+        let window = UIWindow(windowScene: windowScene)
+        
+        // Инкапсулируем зависимости в ToDoListModuleBuilder.
+        let rootViewController = ToDoListModuleBuilder.build()
+        
+        let navigationController = UINavigationController(
+            rootViewController: rootViewController
+        )
+        window.rootViewController = navigationController
+        window.makeKeyAndVisible()
+        self.window = window
     }
 }
