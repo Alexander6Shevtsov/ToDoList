@@ -42,28 +42,31 @@ final class ToDoRepository {
         } completion: { completion($0) }
     }
     
-    func search(
-        query: String,
-        completion: @escaping (Result<[ToDoEntity], Error>) -> Void
-    ) {
-        performBackground { context in
-            let request: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
-            let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmedQuery.isEmpty == false {
-                request.predicate = NSPredicate(
-                    format: "title CONTAINS[cd] %@ OR details CONTAINS[cd] %@",
-                    trimmedQuery,
-                    trimmedQuery
-                )
+    // MARK: - Public Methods
+    func search(query: String, completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedQuery.isEmpty == false else {
+            fetchAll(completion: completion)
+            return
+        }
+        
+        let normalizedQuery = trimmedQuery.lowercased()
+        
+        fetchAll { result in
+            switch result {
+            case .success(let allItems):
+                let filteredItems = allItems.filter { entity in
+                    let titleMatch = entity.title.lowercased().contains(normalizedQuery)
+                    let detailsMatch = entity.details?.lowercased().contains(normalizedQuery) ?? false
+                    return titleMatch || detailsMatch
+                }
+                completion(.success(filteredItems))
+            case .failure(let repositoryError):
+                completion(.failure(repositoryError))
             }
-            request.sortDescriptors = [NSSortDescriptor(
-                key: #keyPath(CDToDo.createdAt),
-                ascending: false
-            )]
-            let objects = try context.fetch(request)
-            return objects.map { $0.toDomain() }
-        } completion: { completion($0) }
+        }
     }
+    
     
     func upsert(
         _ entities: [ToDoEntity],

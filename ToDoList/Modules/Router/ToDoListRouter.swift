@@ -31,12 +31,13 @@ final class ToDoListRouter: ToDoListRouterInput {
         from.present(UINavigationController(rootViewController: editor), animated: true)
     }
     
+    // MARK: - Public Methods
     func openEdit(
         id: Int,
         title: String,
         details: String?,
         date: Date,
-        from: UIViewController,
+        from presenterViewController: UIViewController,
         onSave: @escaping (String, String?) -> Void
     ) {
         let editor = TaskEditorViewController(
@@ -46,12 +47,15 @@ final class ToDoListRouter: ToDoListRouterInput {
             dateText: dateFormatter.string(from: date)
         )
         editor.onSave = onSave
-        from.present(UINavigationController(rootViewController: editor), animated: true)
+        presenterViewController.present(
+            UINavigationController(rootViewController: editor),
+            animated: true
+        )
     }
     
     func openDetails(
         model: ToDoDetailsModel,
-        from: UIViewController,
+        from presenterViewController: UIViewController,
         onEdit: @escaping (Int) -> Void,
         onDelete: @escaping (Int) -> Void,
         onToggleDone: @escaping (Int) -> Void
@@ -61,8 +65,7 @@ final class ToDoListRouter: ToDoListRouterInput {
         detailsSheet.onDelete = { onDelete(model.id) }
         detailsSheet.onToggleDone = { onToggleDone(model.id) }
         detailsSheet.modalPresentationStyle = .automatic
-        detailsSheet.modalTransitionStyle   = .coverVertical
-        
-        from.present(detailsSheet, animated: true)
+        detailsSheet.modalTransitionStyle = .coverVertical
+        presenterViewController.present(detailsSheet, animated: true)
     }
 }
