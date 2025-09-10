@@ -8,9 +8,11 @@
 import UIKit
 
 final class ToDoListViewController: UIViewController {
+    
+    // MARK: - Public Properties
     var output: ToDoListViewOutput!
     
-    // MARK: - State
+    // MARK: - Private Properties
     private var items: [ToDoViewModel] = []
     
     // MARK: - UI
@@ -33,7 +35,7 @@ final class ToDoListViewController: UIViewController {
         return label
     }()
     
-    // MARK: - Lifecycle
+    // MARK: - Overrides
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -259,7 +261,11 @@ extension ToDoListViewController: ToDoListViewInput {
     
     func showError(_ message: String) {
         DispatchQueue.main.async {
-            let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+            let alert = UIAlertController(
+                title: "Error",
+                message: message,
+                preferredStyle: .alert
+            )
             alert.addAction(UIAlertAction(title: "OK", style: .default))
             self.present(alert, animated: true)
         }
@@ -268,31 +274,45 @@ extension ToDoListViewController: ToDoListViewInput {
     func setCounterText(_ text: String) { counterLabel.text = text }
 }
 
-// MARK: - Table
+// MARK: - UITableViewDataSource & UITableViewDelegate
 extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { items.count }
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return items.count
+    }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let vm = items[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: ToDoCell.reuseId, for: indexPath) as! ToDoCell
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
+        let viewModel = items[indexPath.row]
         
-        cell.configure(title: vm.title, body: vm.subtitle, date: vm.meta, isDone: vm.isDone)
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: ToDoCell.reuseId,
+            for: indexPath
+        ) as! ToDoCell
         
-        // Переключение статуса
+        cell.configure(
+            title: viewModel.title,
+            body: viewModel.subtitle,
+            date: viewModel.meta,
+            isDone: viewModel.isDone
+        )
+        
         cell.onToggleTapped = { [weak self] in
-            self?.output.didToggleDone(id: vm.id)
+            self?.output.didToggleDone(id: viewModel.id)
         }
         
         cell.selectionStyle = .none
         cell.tintColor = AppColor.yellow
         cell.backgroundColor = AppColor.black
         cell.accessoryType = .disclosureIndicator
+        
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let todoId = items[indexPath.row].id
-        output.didSelectItem(id: todoId)
+        let todoIdentifier = items[indexPath.row].id
+        output.didSelectItem(id: todoIdentifier)
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
