@@ -39,7 +39,7 @@ final class ToDosAPIClient {
             }
             
             guard
-                let httpResponse = response as? HTTPURLResponse, // Изменение: http -> httpResponse
+                let httpResponse = response as? HTTPURLResponse,
                 (200..<300).contains(httpResponse.statusCode)
             else {
                 let status = (response as? HTTPURLResponse)?.statusCode ?? -1

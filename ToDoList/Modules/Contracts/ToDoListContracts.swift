@@ -31,7 +31,9 @@ protocol ToDoListInteractorInput: AnyObject {
     func search(query: String)
     func toggleDone(id: Int)
     func delete(id: Int)
+    
     func create(title: String, details: String?)
+    func update(id: Int, title: String, details: String?)
     func editTask(id: Int, title: String, details: String?)
 }
 
@@ -41,8 +43,12 @@ protocol ToDoListInteractorOutput: AnyObject {
     func didChangeLoading(_ isLoading: Bool)
 }
 
+// MARK: - Default Implementations
 extension ToDoListInteractorInput {
     func create(title: String, details: String?) {}
+    func update(id: Int, title: String, details: String?) {
+        editTask(id: id, title: title, details: details)
+    }
     func editTask(id: Int, title: String, details: String?) {}
 }
 
