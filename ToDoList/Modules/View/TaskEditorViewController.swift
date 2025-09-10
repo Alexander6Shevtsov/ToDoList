@@ -14,7 +14,7 @@ enum TaskEditorMode {
 
 final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate {
     
-    // MARK: Public
+    // MARK: - Public Properties
     var onSave: ((String, String?) -> Void)?
     
     private let mode: TaskEditorMode
@@ -61,7 +61,7 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     
     // MARK: UI
     private let scrollView = UIScrollView()
-    private let content = UIStackView()
+    private let contentStack = UIStackView()
     
     private let titleTextField: UITextField = {
         let title = UITextField()
@@ -95,7 +95,7 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     
     private let bottomSpacer = UIView()
     
-    // MARK: Lifecycle
+    // MARK: Overrides
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -116,7 +116,7 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
         
         updateSaveVisibility()
         setupLayout()
-        bind()
+        bindInitialState()
         addKeyboardObservers()
         
         titleTextField.delegate = self
@@ -139,15 +139,15 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
         ])
         
         // Контейнер
-        content.axis = .vertical
-        content.spacing = 16
-        content.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(content)
+        contentStack.axis = .vertical
+        contentStack.spacing = 16
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(contentStack)
         NSLayoutConstraint.activate([
-            content.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            content.leadingAnchor.constraint(equalTo: scrollView.frameLayoutGuide.leadingAnchor),
-            content.trailingAnchor.constraint(equalTo: scrollView.frameLayoutGuide.trailingAnchor),
-            content.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor)
+            contentStack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentStack.leadingAnchor.constraint(equalTo: scrollView.frameLayoutGuide.leadingAnchor),
+            contentStack.trailingAnchor.constraint(equalTo: scrollView.frameLayoutGuide.trailingAnchor),
+            contentStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor)
         ])
         
         // Шапка: Заголовок + Дата
@@ -157,19 +157,19 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
         headerStack.translatesAutoresizingMaskIntoConstraints = false
         headerStack.addArrangedSubview(titleTextField)
         headerStack.addArrangedSubview(dateLabel)
-        content.addArrangedSubview(headerStack)
+        contentStack.addArrangedSubview(headerStack)
         
         // Текст задачи
-        content.addArrangedSubview(bodyTextView)
+        contentStack.addArrangedSubview(bodyTextView)
         bodyTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 240).isActive = true
         
         // Нижний спейсер
         bottomSpacer.translatesAutoresizingMaskIntoConstraints = false
         bottomSpacer.heightAnchor.constraint(equalToConstant: 0).isActive = true
-        content.addArrangedSubview(bottomSpacer)
+        contentStack.addArrangedSubview(bottomSpacer)
     }
     
-    private func bind() {
+    private func bindInitialState() {
         dateLabel.text = dateText
     }
     
@@ -185,8 +185,9 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     }
     
     private func dismissOrPop() {
-        if let nav = navigationController, nav.viewControllers.first != self {
-            nav.popViewController(animated: true)
+        if let navigationControllerRef = navigationController,
+            navigationControllerRef.viewControllers.first != self {
+            navigationControllerRef.popViewController(animated: true)
         } else {
             dismiss(animated: true)
         }

@@ -106,8 +106,10 @@ extension ToDoListPresenter: ToDoListViewOutput {
         else { return }
         
         let trimmedDetails: String? = {
-            let raw = selectedEntity.details?.trimmingCharacters(in: .whitespacesAndNewlines)
-            return (raw?.isEmpty == false) ? raw : nil
+            let detailsCandidate = selectedEntity.details?.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+            return (detailsCandidate?.isEmpty == false) ? detailsCandidate : nil
         }()
         
         let detailsModel = ToDoDetailsModel(
