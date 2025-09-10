@@ -13,41 +13,41 @@ final class ToDoCell: UITableViewCell {
     // Вызов при тапе по статусу
     var onToggleTapped: (() -> Void)?
     
-    // UIButton для обработки тапа
+    // MARK: - UI
     private let statusButton: UIButton = {
-        let b = UIButton(type: .system)
-        b.translatesAutoresizingMaskIntoConstraints = false
-        b.tintColor = AppColor.yellow
-        b.backgroundColor = .clear
-        b.accessibilityIdentifier = "todo.statusButton"
-        return b
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.tintColor = AppColor.yellow
+        button.backgroundColor = .clear
+        button.accessibilityIdentifier = "todo.statusButton"
+        return button
     }()
     
     private let titleLabel: UILabel = {
-        let l = UILabel()
-        l.numberOfLines = 1
-        l.font = .systemFont(ofSize: 20, weight: .semibold)
-        l.textColor = AppColor.white
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
+        let label = UILabel()
+        label.numberOfLines = 1
+        label.font = .systemFont(ofSize: 20, weight: .semibold)
+        label.textColor = AppColor.white
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
     private let bodyLabel: UILabel = {
-        let l = UILabel()
-        l.numberOfLines = 2
-        l.font = .systemFont(ofSize: 15, weight: .regular)
-        l.textColor = UIColor(white: 1, alpha: 0.85)
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
+        let label = UILabel()
+        label.numberOfLines = 2
+        label.font = .systemFont(ofSize: 15, weight: .regular)
+        label.textColor = UIColor(white: 1, alpha: 0.85)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
     private let dateLabel: UILabel = {
-        let l = UILabel()
-        l.numberOfLines = 1
-        l.font = .systemFont(ofSize: 13, weight: .regular)
-        l.textColor = UIColor(white: 1, alpha: 0.6)
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
+        let label = UILabel()
+        label.numberOfLines = 1
+        label.font = .systemFont(ofSize: 13, weight: .regular)
+        label.textColor = UIColor(white: 1, alpha: 0.6)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
     private let separator: UIView = {

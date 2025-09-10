@@ -9,6 +9,8 @@ import UIKit
 import CoreData
 
 final class ToDoRepository {
+    
+    // MARK: - Private Properties
     private let persistentContainer: NSPersistentContainer
     
     init(persistentContainer: NSPersistentContainer? = nil) {
