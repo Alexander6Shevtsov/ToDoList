@@ -26,7 +26,6 @@ enum ToDoListModuleBuilder {
             router: router
         )
         
-        // Связи
         interactor.output = presenter
         viewController.output = presenter
         
