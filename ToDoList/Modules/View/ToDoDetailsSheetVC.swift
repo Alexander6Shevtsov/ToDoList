@@ -80,8 +80,8 @@ final class ToDoDetailsSheetViewController: UIViewController {
         ])
         
         // Тап по фону — закрыть
-        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissSelf))
-        dimView.addGestureRecognizer(tap)
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissSelf))
+        dimView.addGestureRecognizer(tapRecognizer)
     }
     
     // MARK: Layout
@@ -200,10 +200,10 @@ final class ToDoDetailsSheetViewController: UIViewController {
         isDestructive: Bool,
         action: Selector
     ) {
-        let row = UIControl()
-        row.translatesAutoresizingMaskIntoConstraints = false
-        row.heightAnchor.constraint(equalToConstant: 44).isActive = true
-        row.addTarget(self, action: action, for: .touchUpInside)
+        let actionRow = UIControl()
+        actionRow.translatesAutoresizingMaskIntoConstraints = false
+        actionRow.heightAnchor.constraint(equalToConstant: 44).isActive = true
+        actionRow.addTarget(self, action: action, for: .touchUpInside)
         
         let titleLabel = UILabel()
         titleLabel.text = title
@@ -218,20 +218,20 @@ final class ToDoDetailsSheetViewController: UIViewController {
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.setContentHuggingPriority(.required, for: .horizontal)
         
-        row.addSubview(titleLabel)
-        row.addSubview(iconView)
+        actionRow.addSubview(titleLabel)
+        actionRow.addSubview(iconView)
         
         NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 12),
-            titleLabel.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            titleLabel.leadingAnchor.constraint(equalTo: actionRow.leadingAnchor, constant: 12),
+            titleLabel.centerYAnchor.constraint(equalTo: actionRow.centerYAnchor),
             
-            iconView.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -12),
-            iconView.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            iconView.trailingAnchor.constraint(equalTo: actionRow.trailingAnchor, constant: -12),
+            iconView.centerYAnchor.constraint(equalTo: actionRow.centerYAnchor),
             iconView.widthAnchor.constraint(equalToConstant: 22),
             iconView.heightAnchor.constraint(equalToConstant: 22)
         ])
         
-        actionsStack.addArrangedSubview(row)
+        actionsStack.addArrangedSubview(actionRow)
     }
     
     private func addSeparator() {
@@ -260,8 +260,8 @@ final class ToDoDetailsSheetViewController: UIViewController {
     @objc private func shareTapped() {
         var items: [Any] = [model.title]
         if let text = model.details, !text.isEmpty { items.append(text) }
-        let ac = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        present(ac, animated: true)
+        let activityController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        present(activityController, animated: true)
     }
     @objc private func deleteTapped() {
         let alert = UIAlertController(title: "Удалить задачу?", message: nil, preferredStyle: .actionSheet)
