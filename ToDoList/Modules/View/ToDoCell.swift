@@ -102,14 +102,42 @@ final class ToDoCell: UITableViewCell {
     
     // MARK: - Configure
     func configure(title: String, body: String?, date: String, isDone: Bool) {
-        titleLabel.text = title
-        bodyLabel.text = body
-        dateLabel.text = date
+        titleLabel.attributedText = makeTitleAttributed(text: title, isDone: isDone) // зачёркивание
         
-        // Иконки статуса на кнопке
+        // Приглушение выполненной задачи
+        bodyLabel.text = body
+        bodyLabel.alpha = isDone ? 0.6 : 1.0
+        
+        dateLabel.text = date
+        dateLabel.alpha = isDone ? 0.6 : 0.8
+        
+        // Иконка статуса
         let imageName = isDone ? "checkmark.circle.fill" : "circle"
         statusButton.setImage(UIImage(systemName: imageName), for: .normal)
         statusButton.accessibilityLabel = isDone ? "Отметить как не выполнено" : "Отметить как выполнено"
+    }
+    
+    // MARK: - Private Methods
+    /// Опциональное зачёркивание
+    private func makeTitleAttributed(text: String, isDone: Bool) -> NSAttributedString {
+        let baseColor: UIColor = titleLabel.textColor ?? .label
+        let baseFont: UIFont = titleLabel.font ?? .systemFont(ofSize: 20, weight: .semibold)
+        
+        if isDone {
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: baseFont,
+                .foregroundColor: baseColor.withAlphaComponent(0.7),
+                .strikethroughStyle: NSUnderlineStyle.single.rawValue,
+                .strikethroughColor: baseColor
+            ]
+            return NSAttributedString(string: text, attributes: attributes)
+        } else {
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: baseFont,
+                .foregroundColor: baseColor
+            ]
+            return NSAttributedString(string: text, attributes: attributes)
+        }
     }
     
     // MARK: - Actions

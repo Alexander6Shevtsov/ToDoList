@@ -12,12 +12,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     // MARK: - Public Properties
     var window: UIWindow?
     
-    // MARK: - Overrides
-    // Точка входа при создании сцены: конфигурируем тему, окно и корневой модуль
-    override func responds(to aSelector: Selector!) -> Bool {
-        super.responds(to: aSelector)
-    }
-    
+    // MARK: - UIWindowSceneDelegate
     func scene(
         _ scene: UIScene,
         willConnectTo session: UISceneSession,
@@ -26,29 +21,26 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         ThemeConfigurator.apply()
         
         guard let windowScene = scene as? UIWindowScene else { return }
-        
-        // Выделил установку корневого контроллера в отдельный метод
         setRootController(in: windowScene)
     }
     
-    // Сохранение контекста при уходе в фон
     func sceneDidEnterBackground(_ scene: UIScene) {
-        (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            appDelegate.saveContext()
+        }
     }
     
     // MARK: - Private Methods
-    // Создание окна и установка корневого контроллера навигации
+    /// Создаём окно и назначаем корневой контроллер
     private func setRootController(in windowScene: UIWindowScene) {
-        let window = UIWindow(windowScene: windowScene)
+        let appWindow = UIWindow(windowScene: windowScene)
         
-        // Инкапсулируем зависимости в ToDoListModuleBuilder.
-        let rootViewController = ToDoListModuleBuilder.build()
+        // Экран списка задач создаётся билдером модуля
+        let listViewController = ToDoListModuleBuilder.build()
+        let navigationController = UINavigationController(rootViewController: listViewController)
         
-        let navigationController = UINavigationController(
-            rootViewController: rootViewController
-        )
-        window.rootViewController = navigationController
-        window.makeKeyAndVisible()
-        self.window = window
+        appWindow.rootViewController = navigationController
+        appWindow.makeKeyAndVisible()
+        window = appWindow
     }
 }
