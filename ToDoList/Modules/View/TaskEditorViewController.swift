@@ -36,14 +36,14 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     }()
     
     private lazy var barBackButton: UIButton = {
-        let b = UIButton(type: .system)
-        b.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        b.setTitle(" Назад", for: .normal)
-        b.tintColor = AppColor.yellow
-        b.setTitleColor(AppColor.yellow, for: .normal)
-        b.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
-        b.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
-        return b
+        let backButton = UIButton(type: .system)
+        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        backButton.setTitle(" Назад", for: .normal)
+        backButton.tintColor = AppColor.yellow
+        backButton.setTitleColor(AppColor.yellow, for: .normal)
+        backButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+        backButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+        return backButton
     }()
     
     init(mode: TaskEditorMode, title: String?, details: String?, dateText: String) {
@@ -98,8 +98,9 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     // MARK: Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         overrideUserInterfaceStyle = .dark
-        view.backgroundColor = AppColor.black
+        view.backgroundColor = AppColor.background
         
         navigationItem.title = nil
         navigationController?.navigationBar.prefersLargeTitles = false
@@ -239,22 +240,33 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     private func addKeyboardObservers() {
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(kb),
+            selector: #selector(handleKeyboardFrameChange),
             name: UIResponder.keyboardWillChangeFrameNotification,
             object: nil
         )
     }
     
-    @objc private func kb(_ n: Notification) {
+    // MARK: - Keyboard
+    @objc private func handleKeyboardFrameChange(_ notification: Notification) {
         guard
-            let userInfo = n.userInfo,
-            let end = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue,
-            let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval
+            let userInfo = notification.userInfo,
+            let frameValue = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
+            let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval,
+            let curveRaw = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt
         else { return }
-        let bottom = max(0, view.bounds.height - end.origin.y)
-        UIView.animate(withDuration: duration) { [weak self] in
-            self?.scrollView.contentInset.bottom = bottom
-            self?.scrollView.verticalScrollIndicatorInsets.bottom = bottom
+        
+        // Переводим фрейм клавиатуры в координаты текущего view
+        let keyboardEndFrameScreen = frameValue.cgRectValue
+        let keyboardEndFrameInView = view.convert(keyboardEndFrameScreen, from: nil)
+        let intersection = view.bounds.intersection(keyboardEndFrameInView)
+        let bottomInset = max(0, intersection.height - view.safeAreaInsets.bottom)
+        
+        let options = UIView.AnimationOptions(rawValue: curveRaw << 16)
+        UIView.animate(withDuration: duration, delay: 0, options: options) { [weak self] in
+            guard let self = self else { return }
+            self.scrollView.contentInset.bottom = bottomInset
+            self.scrollView.verticalScrollIndicatorInsets.bottom = bottomInset
+            self.view.layoutIfNeeded()
         }
     }
 }

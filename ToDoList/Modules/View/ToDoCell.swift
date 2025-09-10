@@ -10,7 +10,6 @@ import UIKit
 final class ToDoCell: UITableViewCell {
     static let reuseId = "ToDoCell"
     
-    // Вызов при тапе по статусу
     var onToggleTapped: (() -> Void)?
     
     // MARK: - UI
@@ -57,12 +56,13 @@ final class ToDoCell: UITableViewCell {
         return separatorView
     }()
     
+    // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        backgroundColor = AppColor.black
-        contentView.backgroundColor = AppColor.black
+        
+        backgroundColor = AppColor.background
+        contentView.backgroundColor = AppColor.background
         selectionStyle = .none
-        tintColor = AppColor.yellow
         
         contentView.addSubview(statusButton)
         contentView.addSubview(titleLabel)
@@ -100,27 +100,9 @@ final class ToDoCell: UITableViewCell {
     
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        titleLabel.attributedText = nil
-        titleLabel.text = nil
-        bodyLabel.text = nil
-        dateLabel.text = nil
-        onToggleTapped = nil
-    }
-    
-    // конфигурация
-    func configure(title: String, body: String?, date: String?, isDone: Bool) {
-        if isDone {
-            let doneTitleAttributes: [NSAttributedString.Key: Any] = [
-                .foregroundColor: AppColor.white,
-                .strikethroughStyle: NSUnderlineStyle.single.rawValue
-            ]
-            titleLabel.attributedText = NSAttributedString(string: title, attributes: doneTitleAttributes)
-        } else {
-            titleLabel.text = title
-        }
-        
+    // MARK: - Configure
+    func configure(title: String, body: String?, date: String, isDone: Bool) {
+        titleLabel.text = title
         bodyLabel.text = body
         dateLabel.text = date
         
