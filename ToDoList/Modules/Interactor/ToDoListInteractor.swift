@@ -7,11 +7,13 @@
 
 import Foundation
 
+// MARK: - ToDoListInteractor
 final class ToDoListInteractor: ToDoListInteractorInput {
     
+    // MARK: - Public Properties
     weak var output: ToDoListInteractorOutput?
     
-    // MARK: - First-launch seed flag
+    // MARK: - Private Properties
     private let seedFlagKey = "seededOnce"
     private var hasSeeded: Bool {
         get { userDefaults.bool(forKey: seedFlagKey) }
@@ -21,9 +23,7 @@ final class ToDoListInteractor: ToDoListInteractorInput {
     private let apiClient: ToDosAPIClient
     private let userDefaults: UserDefaults
     private let repository: ToDoRepository
-    private let seededKey = "todo.seeded"
     
-    // Фоновая очередь
     private let operationQueue: OperationQueue = {
         let operationQueue = OperationQueue()
         operationQueue.name = "todo.interactor.queue"
@@ -31,7 +31,7 @@ final class ToDoListInteractor: ToDoListInteractorInput {
         return operationQueue
     }()
     
-    // MARK: - Init
+    // MARK: - Initializers
     init(
         apiClient: ToDosAPIClient = ToDosAPIClient(),
         userDefaults: UserDefaults = .standard,
@@ -42,7 +42,7 @@ final class ToDoListInteractor: ToDoListInteractorInput {
         self.repository = repository
     }
     
-    // MARK: - ToDoListInteractorInput
+    // MARK: - ToDoListInteractorInput (Public Methods)
     func initialLoad() {
         output?.didChangeLoading(true)
         if !hasSeeded && repository.isStoreEmpty() {
@@ -65,6 +65,7 @@ final class ToDoListInteractor: ToDoListInteractorInput {
         fetchAll()
     }
     
+    /// Загрузка всех задач из локального репозитория
     func fetchAll() {
         output?.didChangeLoading(true)
         operationQueue.addOperation { [weak self] in
@@ -115,7 +116,7 @@ final class ToDoListInteractor: ToDoListInteractorInput {
         }
     }
     
-    func update(id: Int, title: String, details: String?) {
+    func editTask(id: Int, title: String, details: String?) {
         operationQueue.addOperation { [weak self] in
             self?.repository.update(
                 id: id,
@@ -143,19 +144,22 @@ final class ToDoListInteractor: ToDoListInteractorInput {
         }
     }
     
-    // MARK: - Notify
+    // MARK: - Private Methods
+    /// Уведомляем Presentor об обновлении элементов на главном потоке
     private func notify(items: [ToDoEntity]) {
         DispatchQueue.main.async { [weak self] in
             self?.output?.didUpdate(items: items)
         }
     }
     
+    /// Уведомляем презентер о состоянии загрузки
     private func notifyLoading(_ isLoading: Bool) {
         DispatchQueue.main.async { [weak self] in
             self?.output?.didChangeLoading(isLoading)
         }
     }
     
+    /// Уведомляем презентер об ошибке
     private func notifyError(_ error: Error) {
         DispatchQueue.main.async { [weak self] in
             self?.output?.didFail(error: error)

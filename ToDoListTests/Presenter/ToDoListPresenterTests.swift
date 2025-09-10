@@ -55,7 +55,7 @@ final class ToDoListPresenterTests: XCTestCase {
         func toggleDone(id: Int) { toggledId = id }
         func delete(id: Int) { deletedId = id }
         func create(title: String, details: String?) { created = (title, details) }
-        func update(id: Int, title: String, details: String?) {
+        func editTask(id: Int, title: String, details: String?) {
             updated = (id, title, details)
         }
     }

@@ -32,7 +32,7 @@ protocol ToDoListInteractorInput: AnyObject {
     func toggleDone(id: Int)
     func delete(id: Int)
     func create(title: String, details: String?)
-    func update(id: Int, title: String, details: String?)
+    func editTask(id: Int, title: String, details: String?)
 }
 
 protocol ToDoListInteractorOutput: AnyObject {
@@ -43,7 +43,7 @@ protocol ToDoListInteractorOutput: AnyObject {
 
 extension ToDoListInteractorInput {
     func create(title: String, details: String?) {}
-    func update(id: Int, title: String, details: String?) {}
+    func editTask(id: Int, title: String, details: String?) {}
 }
 
 // MARK: - Router

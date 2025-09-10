@@ -137,7 +137,7 @@ extension ToDoListPresenter: ToDoListViewOutput {
                     date: editableEntity.createdAt,
                     from: editPresenter
                 ) { [weak self] newTitle, newDetails in
-                    self?.interactor.update(id: editedId, title: newTitle, details: newDetails)
+                    self?.interactor.editTask(id: editedId, title: newTitle, details: newDetails)
                 }
             },
             onDelete: { [weak self] deletedId in
