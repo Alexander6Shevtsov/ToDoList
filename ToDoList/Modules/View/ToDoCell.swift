@@ -51,10 +51,10 @@ final class ToDoCell: UITableViewCell {
     }()
     
     private let separator: UIView = {
-        let v = UIView()
-        v.backgroundColor = AppColor.stroke
-        v.translatesAutoresizingMaskIntoConstraints = false
-        return v
+        let separatorView = UIView()
+        separatorView.backgroundColor = AppColor.stroke
+        separatorView.translatesAutoresizingMaskIntoConstraints = false
+        return separatorView
     }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
