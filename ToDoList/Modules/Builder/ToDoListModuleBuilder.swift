@@ -7,10 +7,8 @@
 
 import UIKit
 
-// MARK: - ToDoListModuleBuilder
 enum ToDoListModuleBuilder {
     
-    // MARK: - Public Methods
     static func build() -> ToDoListViewController {
         let viewController = ToDoListViewController()
         let interactor = ToDoListInteractor()

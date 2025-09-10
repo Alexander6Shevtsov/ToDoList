@@ -7,51 +7,61 @@
 
 import Foundation
 
+// MARK: - ToDosAPIClient
 final class ToDosAPIClient {
     
+    // MARK: - Private Properties
     private let baseURL = URL(string: "https://dummyjson.com")!
     private let urlSession: URLSession
     
+    // MARK: - Init
     init(urlSession: URLSession = .shared) {
         self.urlSession = urlSession
     }
     
+    // MARK: - Public Methods
     func fetchAll(completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
         var components = URLComponents(
-            url: baseURL.appendingPathComponent("/todos"),
+            url: baseURL.appendingPathComponent("todos"),
             resolvingAgainstBaseURL: true
         )!
         components.queryItems = [URLQueryItem(name: "limit", value: "0")]
-        guard let url = components.url else {
-            return completion(.failure(APIError.invalidURL))
+        
+        guard let requestURL = components.url else {
+            completion(.failure(APIError.invalidURL))
+            return
         }
         
-        urlSession.dataTask(with: url) {
-            data,
-            response,
-            error in
-            if let error = error { return completion(.failure(error)) }
-            guard let http = response as? HTTPURLResponse,
-                  (
-                    200..<300
-                  ).contains(http.statusCode) else {
-                return completion(
-                    .failure(
-                        APIError.httpStatus((response as? HTTPURLResponse)?.statusCode ?? -1)
-                    )
-                )
+        urlSession.dataTask(with: requestURL) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
             }
-            guard let data = data else { return completion(.failure(APIError.emptyData)) }
+            
+            guard
+                let httpResponse = response as? HTTPURLResponse, // Изменение: http -> httpResponse
+                (200..<300).contains(httpResponse.statusCode)
+            else {
+                let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+                completion(.failure(APIError.httpStatus(status)))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(APIError.emptyData))
+                return
+            }
             
             do {
                 let decodedResponse = try JSONDecoder().decode(ToDoResponseDTO.self, from: data)
-                let now = Date()
+                let currentDate = Date()
+                
                 let entities = decodedResponse.todos.map {
                     ToDoEntity(
                         id: $0.id,
                         title: $0.todo,
                         details: nil,
-                        createdAt: now,
+                        createdAt: currentDate,
                         isDone: $0.completed
                     )
                 }
@@ -62,6 +72,7 @@ final class ToDosAPIClient {
         }.resume()
     }
     
+    // MARK: - Types
     enum APIError: Error { case invalidURL, httpStatus(Int), emptyData }
 }
 
