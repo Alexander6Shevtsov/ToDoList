@@ -37,7 +37,7 @@ final class ToDoListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Задачи"
-        view.backgroundColor = AppColor.black
+        view.backgroundColor = AppColor.background
         
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always

@@ -21,3 +21,11 @@ enum AppFont {
     static func subtitle() -> UIFont { .preferredFont(forTextStyle: .subheadline) }
     static func meta() -> UIFont { .preferredFont(forTextStyle: .caption1) }
 }
+
+// MARK: - Theme add-on
+extension AppColor {
+    /// Фон экранов и навбара — чистый чёрный
+    static let background: UIColor = .black
+    /// Поверхности полей и карточек — тёмно-серый
+    static let surface: UIColor = UIColor(white: 0.16, alpha: 1.0)
+}

@@ -127,8 +127,8 @@
 		429E47E92E69B71C0095DC33 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
-				42E9744C2E65BF8F00879F5B /* ToDoList.xcdatamodeld */,
 				42E9744F2E65DB3300879F5B /* CDToDo+CoreData.swift */,
+				42E9744C2E65BF8F00879F5B /* ToDoList.xcdatamodeld */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
