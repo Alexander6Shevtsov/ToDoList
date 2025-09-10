@@ -36,11 +36,14 @@ final class ToDoListViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         title = "Задачи"
         view.backgroundColor = AppColor.background
         
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
+        navigationItem.backButtonDisplayMode = .generic
+        navigationItem.backButtonTitle = "Назад"
         
         setupBottomBar()
         

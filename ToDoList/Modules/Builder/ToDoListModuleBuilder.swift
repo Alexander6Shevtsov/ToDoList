@@ -13,10 +13,8 @@ enum ToDoListModuleBuilder {
     
     static func build() -> UIViewController {
         let container = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer
-        
         let repository = ToDoRepository(persistentContainer: container)
-        
-        // Слои VIPER
+
         let interactor = ToDoListInteractor(repository: repository)
         let router = ToDoListRouter()
         let viewController = ToDoListViewController()
@@ -25,10 +23,13 @@ enum ToDoListModuleBuilder {
             interactor: interactor,
             router: router
         )
-        
+
         interactor.output = presenter
         viewController.output = presenter
-        
+
+        viewController.title = "Задачи"
+        viewController.navigationItem.backButtonDisplayMode = .generic
+        viewController.navigationItem.backButtonTitle = "Назад"
         return viewController
     }
 }
