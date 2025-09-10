@@ -23,7 +23,7 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     private let originalTitle: String
     private let originalDetails: String
     
-    // MARK: Button "Сохранить"
+    // MARK: Button
     private lazy var saveButtonItem: UIBarButtonItem = {
         let item = UIBarButtonItem(
             title: "Сохранить",

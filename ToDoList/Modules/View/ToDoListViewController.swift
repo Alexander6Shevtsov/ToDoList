@@ -15,7 +15,7 @@ final class ToDoListViewController: UIViewController {
     // MARK: - Private Properties
     private var items: [ToDoViewModel] = []
     
-    // MARK: - UI
+    // MARK: - Private UI Properties
     private let tableView = UITableView(frame: .zero, style: .plain)
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
     private let refreshControl = UIRefreshControl()
@@ -124,20 +124,41 @@ final class ToDoListViewController: UIViewController {
             )
         searchBar.setImage(searchIconImage, for: .search, state: .normal)
         
-        let micImg = UIImage(systemName: "mic.fill")?
+        let microphoneImage = UIImage(systemName: "mic.fill")?
             .applyingSymbolConfiguration(symbolConfiguration)?
             .withTintColor(
                 UIColor(white: 1.0, alpha: 0.78),
                 renderingMode: .alwaysOriginal
             )
-        searchBar.setImage(micImg, for: .bookmark, state: .normal)
+        searchBar.setImage(microphoneImage, for: .bookmark, state: .normal)
         searchBar.showsBookmarkButton = true
         searchBar.delegate = self
         
         output.viewDidLoad()
     }
     
-    // MARK: - Bottom bar
+    // MARK: - IB Actions
+    @objc private func didPullToRefresh() {
+        searchController.isActive = false
+        searchController.searchBar.text = ""
+        output.viewDidLoad()
+    }
+    
+    @objc private func didTapAdd() {
+        output.didTapAdd()
+    }
+    
+    @objc private func didTapMic() {
+        let alert = UIAlertController(
+            title: "Voice",
+            message: "Голосовой поиск не реализован",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
+    // MARK: - Private Methods
     private func setupBottomBar() {
         bottomBarBackground.translatesAutoresizingMaskIntoConstraints = false
         bottomBarBackground.backgroundColor = AppColor.gray
@@ -212,26 +233,6 @@ final class ToDoListViewController: UIViewController {
         emptyStateLabel.isHidden = !isEmpty
         tableView.isHidden = isEmpty
     }
-    
-    @objc private func didPullToRefresh() {
-        searchController.isActive = false
-        searchController.searchBar.text = ""
-        output.viewDidLoad()
-    }
-    
-    @objc private func didTapAdd() {
-        output.didTapAdd()
-    }
-    
-    @objc private func didTapMic() {
-        let alert = UIAlertController(
-            title: "Voice",
-            message: "Голосовой поиск не реализован",
-            preferredStyle: .alert
-        )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
-    }
 }
 
 // MARK: - View Input
@@ -271,7 +272,11 @@ extension ToDoListViewController: ToDoListViewInput {
         }
     }
     
-    func setCounterText(_ text: String) { counterLabel.text = text }
+    func setCounterText(_ text: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.counterLabel.text = text
+        }
+    }
 }
 
 // MARK: - UITableViewDataSource & UITableViewDelegate
@@ -317,7 +322,7 @@ extension ToDoListViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-// MARK: - Search
+// MARK: - UISearchResultsUpdating
 extension ToDoListViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         output.didSearch(query: searchController.searchBar.text ?? "")
