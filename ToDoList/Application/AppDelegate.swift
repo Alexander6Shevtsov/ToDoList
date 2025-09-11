@@ -14,10 +14,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: - Public Properties
     var persistentContainer: NSPersistentContainer { coreDataStack.persistentContainer }
     
-    func saveContext() {
-        coreDataStack.saveContext()
-    }
-    
     // MARK: - Private Properties
     // Инкапсулированный стек Core Data
     private let coreDataStack = CoreDataStack(modelName: "ToDoList")
@@ -31,6 +27,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     // MARK: - Public Methods
+    func saveContext() {
+        coreDataStack.saveContext()
+    }
+    
     func makeViewContext() -> NSManagedObjectContext {
         coreDataStack.viewContext
     }
@@ -59,14 +59,15 @@ private final class CoreDataStack {
     }
     
     // MARK: - Public Methods
-    // Безопасный save, если есть изменения
     func saveContext() {
         let context = container.viewContext
         guard context.hasChanges else { return }
-        do {
-            try context.save()
-        } catch {
-            assertionFailure("CoreData save error: \(error)")
+        context.perform {
+            do {
+                try context.save()
+            } catch {
+                assertionFailure("CoreData save error: \(error)")
+            }
         }
     }
 }
