@@ -8,11 +8,12 @@
 import UIKit
 
 final class ToDoCell: UITableViewCell {
-    static let reuseId = "ToDoCell"
     
+    // MARK: - Public Properties
+    static let reuseId = "ToDoCell"
     var onToggleTapped: (() -> Void)?
     
-    // MARK: - UI
+    // MARK: - Private Properties
     private let statusButton: UIButton = {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -100,6 +101,15 @@ final class ToDoCell: UITableViewCell {
     
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
+    // MARK: - Overrides
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        titleLabel.attributedText = nil
+        bodyLabel.alpha = 1.0
+        dateLabel.alpha = 0.8
+        onToggleTapped = nil
+    }
+    
     // MARK: - Configure
     func configure(title: String, body: String?, date: String, isDone: Bool) {
         titleLabel.attributedText = makeTitleAttributed(text: title, isDone: isDone) // зачёркивание
@@ -117,8 +127,13 @@ final class ToDoCell: UITableViewCell {
         statusButton.accessibilityLabel = isDone ? "Отметить как не выполнено" : "Отметить как выполнено"
     }
     
+    // MARK: - Actions
+    @objc private func statusTapped() {
+        onToggleTapped?()
+    }
+    
     // MARK: - Private Methods
-    /// Опциональное зачёркивание
+    // Зачёркивание
     private func makeTitleAttributed(text: String, isDone: Bool) -> NSAttributedString {
         let baseColor: UIColor = titleLabel.textColor ?? .label
         let baseFont: UIFont = titleLabel.font ?? .systemFont(ofSize: 20, weight: .semibold)
@@ -138,10 +153,5 @@ final class ToDoCell: UITableViewCell {
             ]
             return NSAttributedString(string: text, attributes: attributes)
         }
-    }
-    
-    // MARK: - Actions
-    @objc private func statusTapped() {
-        onToggleTapped?()
     }
 }

@@ -7,6 +7,7 @@
 
 import UIKit
 
+// MARK: - AppColor
 enum AppColor {
     static let black  = UIColor(
         red: 0x04/255.0,
@@ -46,6 +47,7 @@ enum AppColor {
     )
 }
 
+// MARK: - AppFont
 enum AppFont {
     static func title() -> UIFont { .preferredFont(forTextStyle: .headline) }
     static func subtitle() -> UIFont { .preferredFont(forTextStyle: .subheadline) }
@@ -54,8 +56,6 @@ enum AppFont {
 
 // MARK: - Theme add-on
 extension AppColor {
-    /// Фон экранов и навбара — чистый чёрный
     static let background: UIColor = .black
-    /// Поверхности полей и карточек — тёмно-серый
     static let surface: UIColor = UIColor(white: 0.16, alpha: 1.0)
 }
