@@ -7,70 +7,36 @@
 
 import UIKit
 
+// Редактор
 enum TaskEditorMode {
     case create
     case edit(id: Int)
 }
 
-final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate {
+final class TaskEditorViewController: UIViewController {
     
     // MARK: - Public Properties
+    /// Save
     var onSave: ((String, String?) -> Void)?
     
+    // MARK: - Private Properties
     private let mode: TaskEditorMode
     private let dateText: String
-    
     private let originalTitle: String
     private let originalDetails: String
     
-    // MARK: Button
-    private lazy var saveButtonItem: UIBarButtonItem = {
-        let item = UIBarButtonItem(
-            title: "Сохранить",
-            style: .done,
-            target: self,
-            action: #selector(saveTapped)
-        )
-        item.tintColor = AppColor.yellow
-        return item
-    }()
-    
-    private lazy var barBackButton: UIButton = {
-        let backButton = UIButton(type: .system)
-        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        backButton.setTitle(" Назад", for: .normal)
-        backButton.tintColor = AppColor.yellow
-        backButton.setTitleColor(AppColor.yellow, for: .normal)
-        backButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
-        backButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
-        return backButton
-    }()
-    
-    init(mode: TaskEditorMode, title: String?, details: String?, dateText: String) {
-        self.mode = mode
-        self.dateText = dateText
-        self.originalTitle = title ?? ""
-        self.originalDetails = details ?? ""
-        super.init(nibName: nil, bundle: nil)
-        titleTextField.text = title
-        bodyTextView.text = details
-        applyPlaceholdersIfNeeded()
-    }
-    
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-    
-    // MARK: UI
+    // UI
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
     
     private let titleTextField: UITextField = {
-        let title = UITextField()
-        title.font = .systemFont(ofSize: 34, weight: .bold)
-        title.textColor = AppColor.white
-        title.tintColor = AppColor.yellow
-        title.placeholder = "Название"
-        title.translatesAutoresizingMaskIntoConstraints = false
-        return title
+        let field = UITextField()
+        field.font = .systemFont(ofSize: 34, weight: .bold)
+        field.textColor = AppColor.white
+        field.tintColor = AppColor.yellow
+        field.placeholder = "Название"
+        field.translatesAutoresizingMaskIntoConstraints = false
+        return field
     }()
     
     private let dateLabel: UILabel = {
@@ -95,7 +61,45 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     
     private let bottomSpacer = UIView()
     
-    // MARK: Overrides
+    private lazy var saveButtonItem: UIBarButtonItem = {
+        let item = UIBarButtonItem(
+            title: "Сохранить",
+            style: .done,
+            target: self,
+            action: #selector(saveTapped)
+        )
+        item.tintColor = AppColor.yellow
+        return item
+    }()
+    
+    private lazy var barBackButton: UIButton = {
+        let backButton = UIButton(type: .system)
+        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        backButton.setTitle(" Назад", for: .normal)
+        backButton.tintColor = AppColor.yellow
+        backButton.setTitleColor(AppColor.yellow, for: .normal)
+        backButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+        backButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+        return backButton
+    }()
+    
+    // MARK: - Init
+    init(mode: TaskEditorMode, title: String?, details: String?, dateText: String) {
+        self.mode = mode
+        self.dateText = dateText
+        self.originalTitle = title ?? ""
+        self.originalDetails = details ?? ""
+        super.init(nibName: nil, bundle: nil)
+        
+        // Первичное заполнение полей
+        titleTextField.text = title
+        bodyTextView.text = details
+        applyPlaceholdersIfNeeded()
+    }
+    
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
+    // MARK: - Overrides
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -104,9 +108,7 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
         
         navigationItem.title = nil
         navigationController?.navigationBar.prefersLargeTitles = false
-        navigationItem.leftBarButtonItem  = UIBarButtonItem(
-            customView: barBackButton
-        )
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: barBackButton)
         
         titleTextField.addTarget(
             self,
@@ -126,7 +128,25 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
     
     deinit { NotificationCenter.default.removeObserver(self) }
     
-    // MARK: Layout
+    // MARK: - IB Actions
+    /// Закрыть редактор
+    @objc private func closeTapped() { dismissOrPop() }
+    
+    /// Сохранить изменения
+    @objc private func saveTapped() {
+        let titleValue = titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let detailsValue = bodyTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !titleValue.isEmpty else { titleTextField.becomeFirstResponder(); return }
+        
+        onSave?(titleValue, (detailsValue?.isEmpty == true) ? nil : detailsValue)
+        dismissOrPop()
+    }
+    
+    /// Изменение текста в поле заголовка
+    @objc private func textEditingChanged() { updateSaveVisibility() }
+    
+    // MARK: - Private Methods
+    /// Разметка интерфейса
     private func setupLayout() {
         // Scroll
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -150,7 +170,7 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
             contentStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor)
         ])
         
-        // Шапка: Заголовок + Дата
+        // Заголовок + Дата
         let headerStack = UIStackView()
         headerStack.axis = .vertical
         headerStack.spacing = 4
@@ -159,7 +179,7 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
         headerStack.addArrangedSubview(dateLabel)
         contentStack.addArrangedSubview(headerStack)
         
-        // Текст задачи
+        // Задача
         contentStack.addArrangedSubview(bodyTextView)
         bodyTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 240).isActive = true
         
@@ -169,71 +189,51 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
         contentStack.addArrangedSubview(bottomSpacer)
     }
     
+    /// Биндинг статического состояния
     private func bindInitialState() {
         dateLabel.text = dateText
     }
     
-    // MARK: Actions
-    @objc private func closeTapped() { dismissOrPop() }
-    
-    @objc private func saveTapped() {
-        let title = titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let details = bodyTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !title.isEmpty else { titleTextField.becomeFirstResponder(); return }
-        onSave?(title, (details?.isEmpty == true) ? nil : details)
-        dismissOrPop()
-    }
-    
+    /// Закрытие экрана: pop если есть стек, иначе dismiss
     private func dismissOrPop() {
         if let navigationControllerRef = navigationController,
-            navigationControllerRef.viewControllers.first != self {
+           navigationControllerRef.viewControllers.first != self {
             navigationControllerRef.popViewController(animated: true)
         } else {
             dismiss(animated: true)
         }
     }
     
-    @objc private func textEditingChanged() { updateSaveVisibility() }
-    func textViewDidChange(_ textView: UITextView) { updateSaveVisibility() }
-    
+    /// Текст описания без плейсхолдера
     private func normalizedDetails() -> String {
         (bodyTextView.text == bodyPlaceholder) ? "" : (bodyTextView.text ?? "")
     }
     
+    /// Видимость «Сохранить»
     private func updateSaveVisibility() {
-        let curTitle = titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let curDetails = normalizedDetails()
+        let currentTitle = titleTextField.text?.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        ) ?? ""
+        let currentDetails = normalizedDetails()
         
         switch mode {
         case .create:
             navigationItem.rightBarButtonItem = saveButtonItem
-            saveButtonItem.isEnabled = !curTitle.isEmpty
+            saveButtonItem.isEnabled = !currentTitle.isEmpty
         case .edit:
-            let changed = (curTitle != originalTitle) || (curDetails != originalDetails)
+            let changed = (currentTitle != originalTitle) || (currentDetails != originalDetails)
             navigationItem.rightBarButtonItem = changed ? saveButtonItem : nil
-            saveButtonItem.isEnabled = !curTitle.isEmpty
+            saveButtonItem.isEnabled = !currentTitle.isEmpty
         }
     }
     
     // MARK: Placeholders
     private let bodyPlaceholder = "Описание"
+    
     private func applyPlaceholdersIfNeeded() {
         if (bodyTextView.text ?? "").isEmpty {
             bodyTextView.text = bodyPlaceholder
             bodyTextView.textColor = UIColor(white: 1, alpha: 0.35)
-        }
-    }
-    
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.text == bodyPlaceholder {
-            textView.text = nil
-            textView.textColor = AppColor.white
-        }
-    }
-    
-    func textViewDidEndEditing(_ textView: UITextView) {
-        if (textView.text ?? "").isEmpty {
-            applyPlaceholdersIfNeeded()
         }
     }
     
@@ -247,7 +247,7 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
         )
     }
     
-    // MARK: - Keyboard
+    /// Обработчик сдвига контента под клавиатуру
     @objc private func handleKeyboardFrameChange(_ notification: Notification) {
         guard
             let userInfo = notification.userInfo,
@@ -256,7 +256,6 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
             let curveRaw = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt
         else { return }
         
-        // Переводим фрейм клавиатуры в координаты текущего view
         let keyboardEndFrameScreen = frameValue.cgRectValue
         let keyboardEndFrameInView = view.convert(keyboardEndFrameScreen, from: nil)
         let intersection = view.bounds.intersection(keyboardEndFrameInView)
@@ -271,3 +270,24 @@ final class TaskEditorViewController: UIViewController, UITextViewDelegate, UITe
         }
     }
 }
+
+// MARK: - UITextViewDelegate
+extension TaskEditorViewController: UITextViewDelegate {
+    func textViewDidChange(_ textView: UITextView) { updateSaveVisibility() }
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.text == bodyPlaceholder {
+            textView.text = nil
+            textView.textColor = AppColor.white
+        }
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if (textView.text ?? "").isEmpty {
+            applyPlaceholdersIfNeeded()
+        }
+    }
+}
+
+// MARK: - UITextFieldDelegate
+extension TaskEditorViewController: UITextFieldDelegate {}
