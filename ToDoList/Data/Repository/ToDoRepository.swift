@@ -14,35 +14,40 @@ final class ToDoRepository {
     private let persistentContainer: NSPersistentContainer
     private var mainContext: NSManagedObjectContext { persistentContainer.viewContext }
     
-    // MARK: - Initializers
+    // MARK: - Init
     init(persistentContainer: NSPersistentContainer? = nil) {
         if let persistentContainer {
             self.persistentContainer = persistentContainer
         } else {
-            let appDelegate = UIApplication.shared.delegate as! AppDelegate
+            // безопасная развёртка
+            guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+                preconditionFailure("AppDelegate is not configured")
+            }
             self.persistentContainer = appDelegate.persistentContainer
         }
-        // Обновления из фоновых контекстов автоматически мерджатся в mainContext
+        
         self.persistentContainer.viewContext.automaticallyMergesChangesFromParent = true
         self.persistentContainer.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     }
     
     // MARK: - Public Methods
+    /// Возвращает все задачи отсортированные по дате создания (новые сверху)
     func fetchAll(completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
-        performBackground { context in
-            let request: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
-            request.sortDescriptors = [NSSortDescriptor(
-                key: #keyPath(
-                    CDToDo.createdAt
-                ),
-                ascending: false
-            )]
-            let objects = try context.fetch(request)
-            return objects.map { $0.toDomain() }
-        } completion: { completion($0) }
+        let context = persistentContainer.viewContext
+        context.perform {
+            do {
+                let request: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
+                request.sortDescriptors = [NSSortDescriptor(key: #keyPath(CDToDo.createdAt), ascending: false)]
+                
+                let objects = try context.fetch(request)
+                let items = objects.map { self.mapToEntity($0) }
+                completion(.success(items))
+            } catch {
+                completion(.failure(error))
+            }
+        }
     }
     
-    // MARK: - Public Methods
     func search(query: String, completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmedQuery.isEmpty == false else {
@@ -67,7 +72,6 @@ final class ToDoRepository {
         }
     }
     
-    
     func upsert(
         _ entities: [ToDoEntity],
         completion: @escaping (Result<Void, Error>) -> Void
@@ -88,51 +92,40 @@ final class ToDoRepository {
         } completion: { completion($0) }
     }
     
-    func toggleDone(
-        id: Int,
-        completion: @escaping (Result<[ToDoEntity], Error>) -> Void
-    ) {
-        performBackground { context in
-            let fetchRequest: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
-            fetchRequest.fetchLimit = 1
-            fetchRequest.predicate = NSPredicate(format: "id == %lld", Int64(id))
-            if let object = try context.fetch(fetchRequest).first {
-                object.isDone.toggle()
-                try context.save()
+    /// Переключает статус и возвращает актуальный список
+    func toggleDone(id: Int, completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
+        let context = persistentContainer.viewContext
+        context.perform {
+            do {
+                let request: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
+                request.predicate = NSPredicate(format: "id == %lld", Int64(id))
+                if let object = try context.fetch(request).first {
+                    object.isDone.toggle()
+                    try context.save()
+                }
+                self.fetchAll(completion: completion)
+            } catch {
+                completion(.failure(error))
             }
-            // Возвращаем актуальный список
-            let allRequest: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
-            allRequest.sortDescriptors = [NSSortDescriptor(
-                key: #keyPath(
-                    CDToDo.createdAt
-                ),
-                ascending: false
-            )]
-            return try context.fetch(allRequest).map { $0.toDomain() }
-        } completion: { completion($0) }
+        }
     }
     
-    func delete(
-        id: Int,
-        completion: @escaping (Result<[ToDoEntity], Error>) -> Void
-    ) {
-        performBackground { context in
-            let fetchRequest: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
-            fetchRequest.fetchLimit = 1
-            fetchRequest.predicate = NSPredicate(format: "id == %lld", Int64(id))
-            if let object = try context.fetch(fetchRequest).first {
-                context.delete(object)
-                try context.save()
+    /// Удаляет задачу и возвращает актуальный список
+    func delete(id: Int, completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
+        let context = persistentContainer.viewContext
+        context.perform {
+            do {
+                let request: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
+                request.predicate = NSPredicate(format: "id == %lld", Int64(id))
+                if let object = try context.fetch(request).first {
+                    context.delete(object)
+                    try context.save()
+                }
+                self.fetchAll(completion: completion)
+            } catch {
+                completion(.failure(error))
             }
-            let allRequest: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
-            allRequest.sortDescriptors = [NSSortDescriptor(
-                key: #keyPath(
-                    CDToDo.createdAt
-                ),
-                ascending: false
-            )]
-            return try context.fetch(allRequest).map { $0.toDomain() }
-        } completion: { completion($0) }
+        }
     }
     
     func replaceAll(
@@ -196,69 +189,42 @@ final class ToDoRepository {
         return isEmpty
     }
     
-    func create(
-        title: String,
-        details: String?,
-        completion: @escaping (Result<[ToDoEntity], Error>) -> Void
-    ) {
-        performBackground { context in
-            // nextId = max(id) + 1
-            let lastRequest: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
-            lastRequest.fetchLimit = 1
-            lastRequest.sortDescriptors = [NSSortDescriptor(
-                key: #keyPath(
-                    CDToDo.id
-                ),
-                ascending: false
-            )]
-            let lastObject = try context.fetch(lastRequest).first
-            let nextId = Int((lastObject?.id ?? 0) + 1)
-            
-            let entity = ToDoEntity(
-                id: nextId,
-                title: title,
-                details: details,
-                createdAt: Date(),
-                isDone: false
-            )
-            _ = CDToDo.insert(into: context, from: entity)
-            try context.save()
-            
-            let allRequest: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
-            allRequest.sortDescriptors = [NSSortDescriptor(
-                key: #keyPath(
-                    CDToDo.createdAt
-                ),
-                ascending: false
-            )]
-            return try context.fetch(allRequest).map { $0.toDomain() }
-        } completion: { completion($0) }
-    }
-    
-    func update(
-        id: Int,
-        title: String,
-        details: String?,
-        completion: @escaping (Result<[ToDoEntity], Error>) -> Void
-    ) {
-        performBackground { context in
-            let fetchRequest: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
-            fetchRequest.fetchLimit = 1
-            fetchRequest.predicate = NSPredicate(format: "id == %lld", Int64(id))
-            if let object = try context.fetch(fetchRequest).first {
+    /// Создаёт задачу и возвращает актуальный список
+    func create(title: String, details: String?, completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
+        let context = persistentContainer.viewContext
+        context.perform {
+            do {
+                let object = CDToDo(context: context)
+                object.id = Int64(self.generateNextId())
                 object.title = title
                 object.details = details
+                object.createdAt = Date()
+                object.isDone = false
                 try context.save()
+                self.fetchAll(completion: completion)
+            } catch {
+                completion(.failure(error))
             }
-            let allRequest: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
-            allRequest.sortDescriptors = [NSSortDescriptor(
-                key: #keyPath(
-                    CDToDo.createdAt
-                ),
-                ascending: false
-            )]
-            return try context.fetch(allRequest).map { $0.toDomain() }
-        } completion: { completion($0) }
+        }
+    }
+    
+    /// Обновляет задачу и возвращает актуальный список
+    func update(id: Int, title: String, details: String?, completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
+        let context = persistentContainer.viewContext
+        context.perform {
+            do {
+                let request: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
+                request.predicate = NSPredicate(format: "id == %lld", Int64(id))
+                if let object = try context.fetch(request).first {
+                    object.title = title
+                    object.details = details
+                    try context.save()
+                }
+                self.fetchAll(completion: completion)
+            } catch {
+                completion(.failure(error))
+            }
+        }
     }
     
     // MARK: - Private Methods
@@ -276,5 +242,33 @@ final class ToDoRepository {
                 completion(.failure(error))
             }
         }
+    }
+    
+    // MARK: - Mapping
+    /// Конвертирует Core Data объект в доменную модель
+    private func mapToEntity(_ object: CDToDo) -> ToDoEntity {
+        ToDoEntity(
+            id: Int(object.id),
+            title: object.title,
+            details: object.details,
+            createdAt: object.createdAt,
+            isDone: object.isDone
+        )
+    }
+    
+    // MARK: - ID Generation
+    /// Генерирует следующий id на основе максимального значения в хранилище
+    private func generateNextId() -> Int {
+        var next = 1
+        let context = persistentContainer.viewContext
+        context.performAndWait {
+            let request: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
+            request.fetchLimit = 1
+            request.sortDescriptors = [NSSortDescriptor(key: #keyPath(CDToDo.id), ascending: false)]
+            if let last = try? context.fetch(request).first {
+                next = Int(last.id) + 1
+            }
+        }
+        return next
     }
 }
