@@ -7,15 +7,6 @@
 
 import UIKit
 
-// MARK: - DTO для экрана деталей
-struct ToDoDetailsModel {
-    let id: Int
-    let title: String
-    let details: String?
-    let dateText: String
-    let isDone: Bool
-}
-
 final class ToDoListPresenter {
     
     // MARK: Dependencies
@@ -161,4 +152,13 @@ extension ToDoListPresenter: ToDoListInteractorOutput {
     }
     
     func didFail(error: Error) { view?.showError(error.localizedDescription) }
+}
+
+// MARK: - Models
+struct ToDoDetailsModel {
+    let id: Int
+    let title: String
+    let details: String?
+    let dateText: String
+    let isDone: Bool
 }
