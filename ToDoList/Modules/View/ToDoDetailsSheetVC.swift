@@ -9,13 +9,13 @@ import UIKit
 
 final class ToDoDetailsSheetViewController: UIViewController {
     
-    // MARK: Input
-    private var model: ToDoDetailsModel
-    
-    // MARK: Callbacks
+    // MARK: - Public Properties
     var onEdit: (() -> Void)?
     var onDelete: (() -> Void)?
     var onToggleDone: (() -> Void)?
+    
+    // MARK: - Private Properties
+    private var model: ToDoDetailsModel
     
     // MARK: UI
     private let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
@@ -39,7 +39,7 @@ final class ToDoDetailsSheetViewController: UIViewController {
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
-    // MARK: Lifecycle
+    // MARK: - Overrides
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .clear
@@ -48,6 +48,34 @@ final class ToDoDetailsSheetViewController: UIViewController {
         bind(model)
     }
     
+    // MARK: - IB Actions
+    @objc private func dismissSelf() { dismiss(animated: true) }
+    
+    @objc private func editTapped() {
+        let editCallback = onEdit
+        dismiss(animated: true) {
+            editCallback?()
+        }
+    }
+    
+    @objc private func shareTapped() {
+        var items: [Any] = [model.title]
+        if let text = model.details, !text.isEmpty { items.append(text) }
+        let activityController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        present(activityController, animated: true)
+    }
+    
+    @objc private func deleteTapped() {
+        let alert = UIAlertController(title: "Удалить задачу?", message: nil, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
+            self?.onDelete?()
+            self?.dismissSelf()
+        })
+        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
+        present(alert, animated: true)
+    }
+    
+    // MARK: - Private Methods
     private func actionIcon(named assetName: String, fallback systemName: String) -> UIImage {
         if let image = UIImage(named: assetName) {
             return image.withRenderingMode(.alwaysTemplate) // используем tintColor
@@ -247,29 +275,5 @@ final class ToDoDetailsSheetViewController: UIViewController {
         titleLabel.text = model.title
         bodyLabel.text = model.details
         dateLabel.text = model.dateText
-    }
-    
-    // MARK: Actions
-    @objc private func dismissSelf() { dismiss(animated: true) }
-    @objc private func editTapped() {
-        let run = onEdit
-        dismiss(animated: true) {
-            run?()
-        }
-    }
-    @objc private func shareTapped() {
-        var items: [Any] = [model.title]
-        if let text = model.details, !text.isEmpty { items.append(text) }
-        let activityController = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        present(activityController, animated: true)
-    }
-    @objc private func deleteTapped() {
-        let alert = UIAlertController(title: "Удалить задачу?", message: nil, preferredStyle: .actionSheet)
-        alert.addAction(UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
-            self?.onDelete?()
-            self?.dismissSelf()
-        })
-        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
-        present(alert, animated: true)
     }
 }
