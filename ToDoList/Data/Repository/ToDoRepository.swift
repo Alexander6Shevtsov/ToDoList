@@ -37,7 +37,10 @@ final class ToDoRepository {
         context.perform {
             do {
                 let request: NSFetchRequest<CDToDo> = CDToDo.fetchRequest()
-                request.sortDescriptors = [NSSortDescriptor(key: #keyPath(CDToDo.createdAt), ascending: false)]
+                request.sortDescriptors = [NSSortDescriptor(
+                    key: #keyPath(CDToDo.createdAt),
+                    ascending: false
+                )]
                 
                 let objects = try context.fetch(request)
                 let items = objects.map { self.mapToEntity($0) }
@@ -189,8 +192,11 @@ final class ToDoRepository {
         return isEmpty
     }
     
-    /// Создаёт задачу и возвращает актуальный список
-    func create(title: String, details: String?, completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
+    func create(
+        title: String,
+        details: String?,
+        completion: @escaping (Result<[ToDoEntity], Error>) -> Void
+    ) {
         let context = persistentContainer.viewContext
         context.perform {
             do {
@@ -208,8 +214,12 @@ final class ToDoRepository {
         }
     }
     
-    /// Обновляет задачу и возвращает актуальный список
-    func update(id: Int, title: String, details: String?, completion: @escaping (Result<[ToDoEntity], Error>) -> Void) {
+    func update(
+        id: Int,
+        title: String,
+        details: String?,
+        completion: @escaping (Result<[ToDoEntity], Error>) -> Void
+    ) {
         let context = persistentContainer.viewContext
         context.perform {
             do {
