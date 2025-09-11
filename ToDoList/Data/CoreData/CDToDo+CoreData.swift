@@ -8,28 +8,32 @@
 import Foundation
 import CoreData
 
+// MARK: - Core Data Entity
 @objc(CDToDo)
 final class CDToDo: NSManagedObject {}
 
+// MARK: - Fetch Request & Managed Properties
 extension CDToDo {
     @nonobjc class func fetchRequest() -> NSFetchRequest<CDToDo> {
         NSFetchRequest<CDToDo>(entityName: "CDToDo")
     }
     
+    // Хранимые поля Core Data
     @NSManaged var id: Int64
     @NSManaged var title: String
     @NSManaged var details: String?
     @NSManaged var createdAt: Date
     @NSManaged var isDone: Bool
+    
     @NSManaged var userId: NSNumber?
     
     var userIdInt: Int? {
         get { userId?.intValue }
-        set { userId = newValue.map(NSNumber.init(value:)) }
+        set { userId = newValue.map { NSNumber(value: $0) } }
     }
 }
 
-// MARK: - Мапинг Core Data
+// MARK: - Mapping (CoreData ↔ Domain)
 extension CDToDo {
     func toDomain() -> ToDoEntity {
         ToDoEntity(
@@ -52,12 +56,12 @@ extension CDToDo {
         into context: NSManagedObjectContext,
         from entity: ToDoEntity
     ) -> CDToDo {
-        let object = CDToDo(context: context)
-        object.id = Int64(entity.id)
-        object.title = entity.title
-        object.details = entity.details
-        object.createdAt = entity.createdAt
-        object.isDone = entity.isDone
-        return object
+        let managedObject = CDToDo(context: context)
+        managedObject.id = Int64(entity.id)
+        managedObject.title = entity.title
+        managedObject.details = entity.details
+        managedObject.createdAt = entity.createdAt
+        managedObject.isDone = entity.isDone
+        return managedObject
     }
 }
