@@ -35,6 +35,11 @@ VIPER-модуль:
 - Repository: `ToDoRepositoryTests`, `ToDoRepositoryReplaceAllTests` (in-memory CoreData)  
 - Presenter: `ToDoListPresenterTests` (load/map/display, routing, forwarding, loading/error)  
 - UI smoke: `ToDoListUITests*` (запуск)
+  
+## Скриншоты
+| Список | Функции | Редактор |
+|---|---|---|
+| ![List](Docs/list.png) | ![Details](Docs/details.png) | ![Editor](Docs/editor.png) |
 
 ## Решения
 - **ID:** в Core Data — `Int64` (тип модели), в домене — `Int`; конвертация в репозитории  
