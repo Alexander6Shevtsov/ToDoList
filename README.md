@@ -1,14 +1,12 @@
 # ToDoList(тестовое)
 
-Todo с локальным хранением и экраном деталей. Тёмная тема, программный UI, без сторибордов для экранов.
-
 ## Стек
-- UI: UIKit, Auto Layout (code)
+- UI: UIKit, Auto Layout
 - Архитектура: VIPER
-- Данные: Core Data (`CDToDo`)
+- Хранение данных: Core Data, UserDefaults
 - Сеть: URLSession, JSONDecoder
 - Тесты: XCTest
-- Язык/OS: Swift 5, iOS 15+
+- Язык/OS: Swift 5+, iOS 15+
 
 ## Первый запуск (seed)
 Если хранилище пустое и `seededOnce == false`, интерактор загружает `https://dummyjson.com/todos?limit=0`, сохраняет в Core Data и отображает список. 
