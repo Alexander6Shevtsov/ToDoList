@@ -1,4 +1,4 @@
-# ToDoList(тестовое)
+# ToDoList
 
 ## Стек
 - UI: UIKit, Auto Layout
