@@ -1,4 +1,5 @@
-# ToDoList
+# ToDoList  
+Менеджер задач
 
 ## Стек
 - UI: UIKit, Auto Layout
